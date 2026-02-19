@@ -90,15 +90,17 @@ export default function ManageUsers() {
   }
 
   function toggleEditRole(role: string) {
-    setEditSelectedRoles((prev) =>
-      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
-    );
+    setEditSelectedRoles((prev) => (prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]));
   }
 
   async function handleSave() {
     if (!editUser) return;
     if (!editFullName.trim() || !editEmail.trim() || editSelectedRoles.length === 0) {
-      toast({ title: "Error", description: "Nombre, correo y al menos un rol son obligatorios.", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Nombre, correo y al menos un rol son obligatorios.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -121,7 +123,8 @@ export default function ManageUsers() {
       const result = response.data;
       if (result.error) throw new Error(result.error);
 
-      toast({ title: "Usuario actualizado", description: `${editFullName} fue actualizado correctamente.` });
+      //toast({ title: "Usuario actualizado", description: `${editFullName} fue actualizado correctamente.` });
+      toast({ title: "Usuario actualizado", description: response });
       setEditOpen(false);
       loadData();
     } catch (err: any) {
@@ -191,14 +194,22 @@ export default function ManageUsers() {
               {filtered.map((u) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-medium text-sm">{u.full_name}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{u.id_type && u.id_number ? `${getIdTypeLabel(u.id_type)} ${u.id_number}` : "—"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {u.id_type && u.id_number ? `${getIdTypeLabel(u.id_type)} ${u.id_number}` : "—"}
+                  </TableCell>
                   <TableCell className="text-sm">{u.email}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{u.phone || "—"}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
-                      {u.roles.length > 0 ? u.roles.map((r) => (
-                        <Badge key={r} variant="outline" className="text-xs">{getRoleLabel(r)}</Badge>
-                      )) : <span className="text-muted-foreground text-xs">Sin rol</span>}
+                      {u.roles.length > 0 ? (
+                        u.roles.map((r) => (
+                          <Badge key={r} variant="outline" className="text-xs">
+                            {getRoleLabel(r)}
+                          </Badge>
+                        ))
+                      ) : (
+                        <span className="text-muted-foreground text-xs">Sin rol</span>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{getProgramName(u.program_id)}</TableCell>
@@ -264,7 +275,9 @@ export default function ManageUsers() {
               <div className="space-y-2">
                 <Label>Tipo de documento</Label>
                 <Select value={editIdType} onValueChange={setEditIdType}>
-                  <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="CC">Cédula de Ciudadanía (CC)</SelectItem>
                     <SelectItem value="TI">Tarjeta de Identidad (TI)</SelectItem>
@@ -284,7 +297,9 @@ export default function ManageUsers() {
             </div>
 
             <div className="space-y-2">
-              <Label>Roles * <span className="text-muted-foreground font-normal">(selecciona uno o más)</span></Label>
+              <Label>
+                Roles * <span className="text-muted-foreground font-normal">(selecciona uno o más)</span>
+              </Label>
               <div className="grid grid-cols-2 gap-2 pt-1">
                 {ROLES.map((r) => (
                   <label key={r.value} className="flex items-center gap-2 cursor-pointer text-sm">
@@ -301,18 +316,24 @@ export default function ManageUsers() {
             <div className="space-y-2">
               <Label>Programa académico</Label>
               <Select value={editProgramId} onValueChange={setEditProgramId}>
-                <SelectTrigger><SelectValue placeholder="Sin programa" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sin programa" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Sin programa</SelectItem>
                   {programs.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setEditOpen(false)}>Cancelar</Button>
+              <Button variant="outline" onClick={() => setEditOpen(false)}>
+                Cancelar
+              </Button>
               <Button onClick={handleSave} disabled={saving}>
                 {saving ? "Guardando..." : "Guardar Cambios"}
               </Button>
