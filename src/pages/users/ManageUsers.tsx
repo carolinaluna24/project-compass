@@ -106,22 +106,25 @@ export default function ManageUsers() {
 
     setSaving(true);
     try {
-      const response = await supabase.functions.invoke("edit-user", {
-        body: {
-          user_id: editUser.id,
-          full_name: editFullName.trim(),
-          email: editEmail.trim(),
-          phone: editPhone.trim() || null,
-          id_type: editIdType || null,
-          id_number: editIdNumber.trim() || null,
-          roles: editSelectedRoles,
-          program_id: editProgramId || null,
-        },
+      const params = new URLSearchParams({
+        user_id: editUser.id,
+        full_name: editFullName.trim(),
+        email: editEmail.trim(),
+        roles: editSelectedRoles.join(","),
       });
+      if (editPhone.trim()) params.set("phone", editPhone.trim());
+      if (editIdType) params.set("id_type", editIdType);
+      if (editIdNumber.trim()) params.set("id_number", editIdNumber.trim());
+      if (editProgramId && editProgramId !== "none") params.set("program_id", editProgramId);
 
-      if (response.error) throw new Error(response.error.message || "Error al actualizar");
-      const result = response.data;
-      if (result.error) throw new Error(result.error);
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/edit-user?${params.toString()}`,
+        { headers: { Authorization: `Bearer ${session?.access_token}` } }
+      );
+      const result = await res.json();
+      if (!res.ok || result.error) throw new Error(result.error || "Error al actualizar");
 
       toast({ title: "Usuario actualizado", description: `${editFullName} fue actualizado correctamente.` });
       setEditOpen(false);
