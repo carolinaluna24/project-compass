@@ -124,7 +124,7 @@ export default function ManageUsers() {
       if (result.error) throw new Error(result.error);
 
       //toast({ title: "Usuario actualizado", description: `${editFullName} fue actualizado correctamente.` });
-      toast({ title: "Usuario actualizado", description: response });
+      toast({ title: "Usuario actualizado", description: result });
       setEditOpen(false);
       loadData();
     } catch (err: any) {
