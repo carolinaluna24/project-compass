@@ -51,20 +51,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Read params from query string
-    const url = new URL(req.url);
-    const email = url.searchParams.get("email") || "";
-    const password = url.searchParams.get("password") || "";
-    const full_name = url.searchParams.get("full_name") || "";
-    const phone = url.searchParams.get("phone") || "";
-    const rolesParam = url.searchParams.get("roles") || "";
-    const role = url.searchParams.get("role") || "";
-    const program_id = url.searchParams.get("program_id") || "";
-    const id_type = url.searchParams.get("id_type") || "";
-    const id_number = url.searchParams.get("id_number") || "";
+    // Read params from POST body
+    const body = await req.json();
+    const email = body.email || "";
+    const password = body.password || "";
+    const full_name = body.full_name || "";
+    const phone = body.phone || "";
+    const rolesParam = body.roles || "";
+    const role = body.role || "";
+    const program_id = body.program_id || "";
+    const id_type = body.id_type || "";
+    const id_number = body.id_number || "";
 
     // Support both comma-separated roles and single role
-    const roleList: string[] = rolesParam ? rolesParam.split(",") : role ? [role] : [];
+    const roleList: string[] = Array.isArray(rolesParam) ? rolesParam : rolesParam ? rolesParam.split(",") : role ? [role] : [];
 
     if (!email || !password || !full_name || roleList.length === 0) {
       return new Response(JSON.stringify({ error: "Campos requeridos: email, password, full_name, al menos un rol" }), {

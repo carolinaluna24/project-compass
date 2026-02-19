@@ -57,22 +57,29 @@ export default function CreateUser() {
 
     setSaving(true);
     try {
-      const params = new URLSearchParams({
+      const payload: Record<string, string> = {
         email: email.trim(),
         password,
         full_name: `${firstName.trim()} ${lastName.trim()}`,
         roles: selectedRoles.join(","),
-      });
-      if (phone.trim()) params.set("phone", phone.trim());
-      if (idType) params.set("id_type", idType);
-      if (idNumber.trim()) params.set("id_number", idNumber.trim());
-      if (programId) params.set("program_id", programId);
+      };
+      if (phone.trim()) payload.phone = phone.trim();
+      if (idType) payload.id_type = idType;
+      if (idNumber.trim()) payload.id_number = idNumber.trim();
+      if (programId) payload.program_id = programId;
 
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/create-user?${params.toString()}`,
-        { headers: { Authorization: `Bearer ${session?.access_token}` } }
+        `https://${projectId}.supabase.co/functions/v1/create-user`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
       );
       const result = await res.json();
       if (!res.ok || result.error) {
