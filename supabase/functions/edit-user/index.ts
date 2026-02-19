@@ -51,17 +51,17 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Read params from query string
-    const reqUrl = new URL(req.url);
-    const user_id = reqUrl.searchParams.get("user_id") || "";
-    const full_name = reqUrl.searchParams.get("full_name") || "";
-    const email = reqUrl.searchParams.get("email") || "";
-    const phone = reqUrl.searchParams.get("phone");
-    const rolesParam = reqUrl.searchParams.get("roles") || "";
-    const role = reqUrl.searchParams.get("role") || "";
-    const program_id = reqUrl.searchParams.get("program_id");
-    const id_type = reqUrl.searchParams.get("id_type");
-    const id_number = reqUrl.searchParams.get("id_number");
+    // Read params from POST body
+    const body = await req.json();
+    const user_id = body.user_id || "";
+    const full_name = body.full_name || "";
+    const email = body.email || "";
+    const phone = body.phone ?? null;
+    const rolesParam = body.roles || "";
+    const role = body.role || "";
+    const program_id = body.program_id ?? null;
+    const id_type = body.id_type ?? null;
+    const id_number = body.id_number ?? null;
 
     if (!user_id) {
       return new Response(JSON.stringify({ error: "user_id es requerido" }), {

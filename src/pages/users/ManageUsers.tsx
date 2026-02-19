@@ -106,22 +106,29 @@ export default function ManageUsers() {
 
     setSaving(true);
     try {
-      const params = new URLSearchParams({
+      const payload: Record<string, string> = {
         user_id: editUser.id,
         full_name: editFullName.trim(),
         email: editEmail.trim(),
         roles: editSelectedRoles.join(","),
-      });
-      if (editPhone.trim()) params.set("phone", editPhone.trim());
-      if (editIdType) params.set("id_type", editIdType);
-      if (editIdNumber.trim()) params.set("id_number", editIdNumber.trim());
-      if (editProgramId && editProgramId !== "none") params.set("program_id", editProgramId);
+      };
+      if (editPhone.trim()) payload.phone = editPhone.trim();
+      if (editIdType) payload.id_type = editIdType;
+      if (editIdNumber.trim()) payload.id_number = editIdNumber.trim();
+      if (editProgramId && editProgramId !== "none") payload.program_id = editProgramId;
 
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/edit-user?${params.toString()}`,
-        { headers: { Authorization: `Bearer ${session?.access_token}` } }
+        `https://${projectId}.supabase.co/functions/v1/edit-user`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
       );
       const result = await res.json();
       if (!res.ok || result.error) throw new Error(result.error || "Error al actualizar");
