@@ -61,7 +61,7 @@ export default function AppLayout() {
   const roleLabel: Record<string, string> = {
     STUDENT: "Estudiante",
     COORDINATOR: "Coordinador",
-    DIRECTOR: "Director",
+    DIRECTOR: "Asesor",
     JUROR: "Jurado",
     DECANO: "Directivo",
   };

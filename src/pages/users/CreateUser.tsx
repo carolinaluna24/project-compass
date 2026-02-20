@@ -12,7 +12,7 @@ import { UserPlus } from "lucide-react";
 const ROLES = [
   { value: "STUDENT", label: "Estudiante" },
   { value: "COORDINATOR", label: "Coordinador" },
-  { value: "DIRECTOR", label: "Director" },
+  { value: "DIRECTOR", label: "Asesor" },
   { value: "JUROR", label: "Jurado" },
   { value: "DECANO", label: "Directivo" },
 ];
