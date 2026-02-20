@@ -76,7 +76,7 @@ export default function DirectorDashboard() {
                 <div className="flex gap-2 flex-wrap">
                   {p.pendingEndorsements.map((stg: any) => (
                     <Link key={stg.id} to={`/${stg.stage_name === "INFORME_FINAL" ? "informe-final" : "anteproyecto"}/${stg.id}/endorse`}>
-                      <Button size="sm">Aval {stg.stage_name === "INFORME_FINAL" ? "Informe" : "Anteproy."}</Button>
+                      <Button size="sm">Avalar {stg.stage_name === "INFORME_FINAL" ? "Informe Final" : "Anteproyecto"}</Button>
                     </Link>
                   ))}
                   <Link to={`/projects/${p.id}`}><Button size="sm" variant="outline">Ver</Button></Link>
