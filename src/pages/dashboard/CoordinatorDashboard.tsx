@@ -34,7 +34,7 @@ export default function CoordinatorDashboard() {
   async function loadData() {
     setLoading(true);
     const [projectsRes, proposalsRes, anteRes, informeRes, sustRes, dirRolesRes, jurorRolesRes] = await Promise.all([
-      supabase.from("projects").select("*, programs(name), modalities(name), user_profiles!projects_director_id_fkey(full_name)").order("created_at", { ascending: false }),
+      supabase.from("projects").select("*, programs(name), modalities(name), user_profiles!projects_director_id_fkey(full_name), project_members(user_id, role, user_profiles:user_id(full_name))").order("created_at", { ascending: false }),
       supabase.from("project_stages").select("*, projects(id, title, programs(name))").eq("stage_name", "PROPUESTA").eq("system_state", "RADICADA"),
       supabase.from("project_stages").select("*, projects(id, title, programs(name))").eq("stage_name", "ANTEPROYECTO").neq("system_state", "CERRADA"),
       supabase.from("project_stages").select("*, projects(id, title, programs(name))").eq("stage_name", "INFORME_FINAL").neq("system_state", "CERRADA"),
@@ -176,7 +176,12 @@ export default function CoordinatorDashboard() {
             <TableBody>
               {projects.map((p) => (
                 <TableRow key={p.id}>
-                  <TableCell className="font-medium text-sm">{p.title}</TableCell>
+                  <TableCell className="font-medium text-sm">
+                    <div>{p.title}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {(p.project_members || []).filter((m: any) => m.role === "AUTHOR").map((m: any) => m.user_profiles?.full_name).filter(Boolean).join(", ") || "Sin autor"}
+                    </p>
+                  </TableCell>
                   <TableCell className="text-sm">{p.programs?.name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{p.user_profiles?.full_name || "—"}</TableCell>
                   <TableCell><Badge className={`text-xs ${statusColor[p.global_status] || "bg-muted"}`}>{p.global_status}</Badge></TableCell>
