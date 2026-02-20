@@ -67,7 +67,7 @@ export default function CoordinatorDashboard() {
     });
     setProjectAuthors(projectAuthorsMap);
 
-    // Cargar perfiles de directores y jurados
+    // Cargar perfiles de asesores y jurados
     const dirIds = (dirRolesRes.data || []).map(r => r.user_id);
     const jurorIds = (jurorRolesRes.data || []).map(r => r.user_id);
     if (dirIds.length > 0) {
@@ -89,7 +89,7 @@ export default function CoordinatorDashboard() {
     VENCIDO: "bg-destructive text-destructive-foreground", CANCELADO: "bg-destructive/80 text-destructive-foreground",
   };
 
-  // Proyectos sin director asignado
+  // Proyectos sin asesor asignado
   const projectsWithoutDirector = projects.filter(p => !p.director_id && p.global_status === "VIGENTE");
 
   function getStageAction(stage: any, type: string) {
@@ -151,13 +151,13 @@ export default function CoordinatorDashboard() {
       {/* Proyectos sin director */}
       {projectsWithoutDirector.length > 0 && (
         <Card className="border-warning/50">
-          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4 text-warning" />Proyectos sin Director ({projectsWithoutDirector.length})</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4 text-warning" />Proyectos sin Asesor ({projectsWithoutDirector.length})</CardTitle></CardHeader>
           <CardContent>
             <div className="space-y-2">
               {projectsWithoutDirector.map((p) => (
                 <div key={p.id} className="flex items-center justify-between rounded-lg border p-3">
                   <div><p className="font-medium text-sm">{p.title}</p><p className="text-xs text-muted-foreground">{p.programs?.name}</p></div>
-                  <Link to={`/projects/${p.id}`}><Button size="sm" variant="outline" className="text-xs gap-1"><Users className="h-3 w-3" />Asignar Director</Button></Link>
+                  <Link to={`/projects/${p.id}`}><Button size="sm" variant="outline" className="text-xs gap-1"><Users className="h-3 w-3" />Asignar Asesor</Button></Link>
                 </div>
               ))}
             </div>
@@ -191,7 +191,7 @@ export default function CoordinatorDashboard() {
         <CardHeader><CardTitle className="text-base">Todos los Proyectos</CardTitle></CardHeader>
         <CardContent>
           <Table>
-            <TableHeader><TableRow><TableHead>Título</TableHead><TableHead>Autor(es)</TableHead><TableHead>Programa</TableHead><TableHead>Director</TableHead><TableHead>Estado</TableHead><TableHead>Fecha</TableHead><TableHead></TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Título</TableHead><TableHead>Autor(es)</TableHead><TableHead>Programa</TableHead><TableHead>Asesor</TableHead><TableHead>Estado</TableHead><TableHead>Fecha</TableHead><TableHead></TableHead></TableRow></TableHeader>
             <TableBody>
               {projects.map((p) => (
                 <TableRow key={p.id}>

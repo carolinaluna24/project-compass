@@ -115,7 +115,7 @@ export default function ProjectDetail() {
       setMembers([]);
     }
 
-    // Cargar directores disponibles si es coordinador
+    // Cargar asesores disponibles si es coordinador
     if (primaryRole === "COORDINATOR") {
       const { data: dirRoles } = await supabase.from("user_roles").select("user_id").eq("role", "DIRECTOR");
       if (dirRoles && dirRoles.length > 0) {
@@ -146,10 +146,10 @@ export default function ProjectDetail() {
         project_id: projectId,
         user_id: user?.id,
         event_type: "DIRECTOR_ASSIGNED",
-        description: "Director asignado al proyecto",
+        description: "Asesor asignado al proyecto",
       });
 
-      toast({ title: "Director asignado exitosamente" });
+      toast({ title: "Asesor asignado exitosamente" });
       loadData();
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -198,26 +198,26 @@ export default function ProjectDetail() {
       {/* Director */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Director del Proyecto</CardTitle>
+          <CardTitle className="text-sm">Asesor del Proyecto</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {project.director_id && (
             <div className="flex items-center gap-3 text-sm">
               <User className="h-4 w-4 text-muted-foreground" />
               <span>{project.user_profiles?.full_name}</span>
-              <Badge variant="outline" className="text-xs">Director</Badge>
+              <Badge variant="outline" className="text-xs">Asesor</Badge>
             </div>
           )}
           {primaryRole === "COORDINATOR" && directors.length > 0 && (
             <div className="space-y-2">
               {!project.director_id && (
-                <p className="text-sm text-muted-foreground">Este proyecto no tiene director asignado.</p>
+                <p className="text-sm text-muted-foreground">Este proyecto no tiene asesor asignado.</p>
               )}
               <div className="flex gap-2 items-end">
                 <div className="flex-1">
                   <Select value={selectedDirector} onValueChange={setSelectedDirector}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar director" />
+                      <SelectValue placeholder="Seleccionar asesor" />
                     </SelectTrigger>
                     <SelectContent>
                       {directors.map(d => (
@@ -233,7 +233,7 @@ export default function ProjectDetail() {
             </div>
           )}
           {!project.director_id && primaryRole !== "COORDINATOR" && (
-            <p className="text-sm text-muted-foreground italic">Sin director asignado</p>
+            <p className="text-sm text-muted-foreground italic">Sin asesor asignado</p>
           )}
         </CardContent>
       </Card>
