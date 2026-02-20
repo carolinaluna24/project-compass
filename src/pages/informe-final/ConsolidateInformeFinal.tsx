@@ -50,8 +50,16 @@ export default function ConsolidateInformeFinal() {
     if (stageData) {
       const { data: proj } = await supabase.from("projects").select("*, programs(name)").eq("id", stageData.project_id).maybeSingle();
       setProject(proj);
-      const { data: evals } = await supabase.from("evaluations").select("*, user_profiles:evaluator_id(full_name, email)").eq("project_stage_id", stageId);
+      const { data: evals } = await supabase.from("evaluations").select("*").eq("project_stage_id", stageId);
       const evalsList = evals || [];
+      // Fetch profiles separately (no FK relation)
+      const evaluatorIds = [...new Set(evalsList.map(e => e.evaluator_id))];
+      let profilesMap: Record<string, any> = {};
+      if (evaluatorIds.length > 0) {
+        const { data: profiles } = await supabase.from("user_profiles").select("id, full_name, email").in("id", evaluatorIds);
+        (profiles || []).forEach(p => { profilesMap[p.id] = p; });
+      }
+      const evalsWithProfiles = evalsList.map(e => ({ ...e, user_profiles: profilesMap[e.evaluator_id] || null }));
       setEvaluations(evalsList);
       if (evalsList.length >= 2) {
         const results = evalsList.map((e) => e.official_result);
