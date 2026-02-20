@@ -63,9 +63,11 @@ export default function SubmitInformeFinal() {
       });
       if (subErr) throw subErr;
 
+      // Si es corrección (versión > 1), saltar aval e ir directo a EN_REVISION
+      const newState = version > 1 ? "EN_REVISION" : "RADICADA";
       await supabase
         .from("project_stages")
-        .update({ system_state: "RADICADA" })
+        .update({ system_state: newState as any })
         .eq("id", stage.id);
 
       await supabase.from("audit_events").insert({
