@@ -50,8 +50,25 @@ export default function ConsolidateInformeFinal() {
     if (stageData) {
       const { data: proj } = await supabase.from("projects").select("*, programs(name)").eq("id", stageData.project_id).maybeSingle();
       setProject(proj);
-      const { data: evals } = await supabase.from("evaluations").select("*").eq("project_stage_id", stageId);
-      const evalsList = evals || [];
+      // Obtener la última submission para filtrar evaluaciones relevantes
+      const { data: latestSub } = await supabase
+        .from("submissions")
+        .select("id")
+        .eq("project_stage_id", stageId)
+        .order("version", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      // Cargar solo evaluaciones de la última submission
+      let evalsList: any[] = [];
+      if (latestSub) {
+        const { data: evals } = await supabase
+          .from("evaluations")
+          .select("*")
+          .eq("project_stage_id", stageId)
+          .eq("submission_id", latestSub.id);
+        evalsList = evals || [];
+      }
       // Fetch profiles separately (no FK relation)
       const evaluatorIds = [...new Set(evalsList.map(e => e.evaluator_id))];
       let profilesMap: Record<string, any> = {};
@@ -202,7 +219,7 @@ export default function ConsolidateInformeFinal() {
               )}
               {consolidatedResult === "APROBADA" && <p className="text-sm text-muted-foreground mt-1">Se habilitará la etapa SUSTENTACIÓN automáticamente.</p>}
             </div>
-            {stage.official_state !== "PENDIENTE" ? (
+            {stage.official_state !== "PENDIENTE" && stage.system_state === "CERRADA" ? (
               <div className="text-center"><Badge className="text-sm">Ya consolidado: {stage.official_state}</Badge></div>
             ) : (
               <div className="flex gap-3 justify-center">

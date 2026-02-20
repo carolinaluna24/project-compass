@@ -75,13 +75,25 @@ export default function ConsolidateAnteproject() {
         .maybeSingle();
       setProject(proj);
 
-      // Cargar evaluaciones
-      const { data: evals } = await supabase
-        .from("evaluations")
-        .select("*")
-        .eq("project_stage_id", stageId);
+      // Obtener la última submission para filtrar evaluaciones relevantes
+      const { data: latestSub } = await supabase
+        .from("submissions")
+        .select("id")
+        .eq("project_stage_id", stageId)
+        .order("version", { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-      const evalsList = evals || [];
+      // Cargar solo evaluaciones de la última submission
+      let evalsList: any[] = [];
+      if (latestSub) {
+        const { data: evals } = await supabase
+          .from("evaluations")
+          .select("*")
+          .eq("project_stage_id", stageId)
+          .eq("submission_id", latestSub.id);
+        evalsList = evals || [];
+      }
 
       // Cargar perfiles de evaluadores por separado (no hay FK directa)
       const evaluatorIds = [...new Set(evalsList.map(e => e.evaluator_id))];
@@ -292,7 +304,7 @@ export default function ConsolidateAnteproject() {
               )}
             </div>
 
-            {stage.official_state !== "PENDIENTE" ? (
+            {stage.official_state !== "PENDIENTE" && stage.system_state === "CERRADA" ? (
               <div className="text-center">
                 <Badge className="text-sm">Ya consolidado: {stage.official_state}</Badge>
               </div>
