@@ -157,7 +157,34 @@ export default function RecordDefenseResult() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="grade">Nota Final (0-100)</Label>
-              <Input id="grade" type="number" min={0} max={100} value={grade} onChange={(e) => setGrade(e.target.value)} placeholder="Ej: 85" required />
+              <Input
+                id="grade"
+                type="number"
+                min={0}
+                max={100}
+                step={1}
+                value={grade}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  // Solo permitir enteros entre 0 y 100
+                  if (val === "") {
+                    setGrade("");
+                    return;
+                  }
+                  const num = parseInt(val, 10);
+                  if (!isNaN(num) && num >= 0 && num <= 100) {
+                    setGrade(String(num));
+                  }
+                }}
+                onKeyDown={(e) => {
+                  // Bloquear punto, coma, "e" para evitar decimales/notación científica
+                  if (e.key === "." || e.key === "," || e.key === "e" || e.key === "E") {
+                    e.preventDefault();
+                  }
+                }}
+                placeholder="Ej: 85"
+                required
+              />
               {gradePreview && (
                 <p className="text-sm font-medium">
                   Mención: <span className={gradeNum < 69 ? "text-destructive" : "text-success"}>{gradePreview}</span>
