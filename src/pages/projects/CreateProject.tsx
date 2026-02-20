@@ -44,8 +44,10 @@ export default function CreateProject() {
   const [description, setDescription] = useState("");
   const [programId, setProgramId] = useState("");
   const [modalityId, setModalityId] = useState("");
+  const [secondAuthorSearchType, setSecondAuthorSearchType] = useState<"document" | "email">("document");
   const [secondAuthorIdType, setSecondAuthorIdType] = useState("");
   const [secondAuthorIdNumber, setSecondAuthorIdNumber] = useState("");
+  const [secondAuthorEmail, setSecondAuthorEmail] = useState("");
   // Validación del segundo autor
   const [secondAuthorStatus, setSecondAuthorStatus] = useState<"idle" | "checking" | "found" | "not_found">("idle");
   const [secondAuthorName, setSecondAuthorName] = useState("");
@@ -84,10 +86,12 @@ export default function CreateProject() {
     loadLookups();
   }, [user]);
 
-  // Validar documento del segundo autor con debounce
+  // Validar segundo autor con debounce (por documento o email)
   useEffect(() => {
-    const idNum = secondAuthorIdNumber.trim();
-    if (!idNum || !secondAuthorIdType) {
+    const byDoc = secondAuthorSearchType === "document";
+    const searchValue = byDoc ? secondAuthorIdNumber.trim() : secondAuthorEmail.trim();
+
+    if (!searchValue || (byDoc && !secondAuthorIdType)) {
       setSecondAuthorStatus("idle");
       setSecondAuthorName("");
       return;
@@ -95,27 +99,28 @@ export default function CreateProject() {
 
     setSecondAuthorStatus("checking");
     const timeout = setTimeout(async () => {
-      const { data } = await supabase
-        .from("user_profiles")
-        .select("id, full_name")
-        .eq("id_type", secondAuthorIdType)
-        .eq("id_number", idNum)
-        .maybeSingle();
+      let query = supabase.from("user_profiles").select("id, full_name");
+
+      if (byDoc) {
+        query = query.eq("id_type", secondAuthorIdType).eq("id_number", searchValue);
+      } else {
+        query = query.eq("email", searchValue);
+      }
+
+      const { data } = await query.maybeSingle();
 
       if (!data) {
         setSecondAuthorStatus("not_found");
-        setSecondAuthorName("Documento no registrado en el sistema");
+        setSecondAuthorName(byDoc ? "Documento no registrado en el sistema" : "Correo no registrado en el sistema");
         return;
       }
 
-      // No permitir el mismo usuario
       if (user && data.id === user.id) {
         setSecondAuthorStatus("not_found");
         setSecondAuthorName("No puedes agregarte a ti mismo como segundo autor");
         return;
       }
 
-      // Verificar que tenga rol STUDENT
       const { data: isStudent } = await supabase
         .rpc("has_role", { _user_id: data.id, _role: "STUDENT" });
 
@@ -130,7 +135,7 @@ export default function CreateProject() {
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [secondAuthorIdType, secondAuthorIdNumber, user]);
+  }, [secondAuthorSearchType, secondAuthorIdType, secondAuthorIdNumber, secondAuthorEmail, user]);
 
   /**
    * Obtener la configuración de la modalidad seleccionada.
@@ -144,7 +149,10 @@ export default function CreateProject() {
   const selectedConfig = getSelectedConfig();
   const isImplemented = selectedConfig?.implemented ?? false;
 
-  const secondAuthorBlocks = (secondAuthorIdNumber.trim() !== "" || secondAuthorIdType !== "") && secondAuthorStatus !== "found";
+  const hasSecondAuthorInput = secondAuthorSearchType === "document"
+    ? (secondAuthorIdNumber.trim() !== "" || secondAuthorIdType !== "")
+    : secondAuthorEmail.trim() !== "";
+  const secondAuthorBlocks = hasSecondAuthorInput && secondAuthorStatus !== "found";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -186,13 +194,14 @@ export default function CreateProject() {
       if (memberErr) throw memberErr;
 
       // 3. Agregar segundo autor si se proporcionó
-      if (secondAuthorIdNumber.trim() && secondAuthorIdType) {
-        const { data: secondProfile } = await supabase
-          .from("user_profiles")
-          .select("id")
-          .eq("id_type", secondAuthorIdType)
-          .eq("id_number", secondAuthorIdNumber.trim())
-          .maybeSingle();
+      if (hasSecondAuthorInput && secondAuthorStatus === "found") {
+        let secondQuery = supabase.from("user_profiles").select("id");
+        if (secondAuthorSearchType === "document") {
+          secondQuery = secondQuery.eq("id_type", secondAuthorIdType).eq("id_number", secondAuthorIdNumber.trim());
+        } else {
+          secondQuery = secondQuery.eq("email", secondAuthorEmail.trim());
+        }
+        const { data: secondProfile } = await secondQuery.maybeSingle();
 
         if (!secondProfile) {
           toast({
@@ -334,37 +343,65 @@ export default function CreateProject() {
               </div>
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label>Segundo autor (opcional)</Label>
-              <div className="grid grid-cols-3 gap-2">
-                <Select value={secondAuthorIdType} onValueChange={setSecondAuthorIdType}>
-                  <SelectTrigger><SelectValue placeholder="Tipo doc." /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="CC">CC</SelectItem>
-                    <SelectItem value="TI">TI</SelectItem>
-                    <SelectItem value="CE">CE</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="relative col-span-2">
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={secondAuthorSearchType === "document" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => { setSecondAuthorSearchType("document"); setSecondAuthorEmail(""); setSecondAuthorStatus("idle"); setSecondAuthorName(""); }}
+                >
+                  Por documento
+                </Button>
+                <Button
+                  type="button"
+                  variant={secondAuthorSearchType === "email" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => { setSecondAuthorSearchType("email"); setSecondAuthorIdType(""); setSecondAuthorIdNumber(""); setSecondAuthorStatus("idle"); setSecondAuthorName(""); }}
+                >
+                  Por correo electrónico
+                </Button>
+              </div>
+
+              {secondAuthorSearchType === "document" ? (
+                <div className="grid grid-cols-3 gap-2">
+                  <Select value={secondAuthorIdType} onValueChange={setSecondAuthorIdType}>
+                    <SelectTrigger><SelectValue placeholder="Tipo doc." /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CC">CC</SelectItem>
+                      <SelectItem value="TI">TI</SelectItem>
+                      <SelectItem value="CE">CE</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <div className="relative col-span-2">
+                    <Input
+                      value={secondAuthorIdNumber}
+                      onChange={(e) => setSecondAuthorIdNumber(e.target.value)}
+                      placeholder="Número de documento"
+                      maxLength={20}
+                      className={secondAuthorStatus === "not_found" ? "border-destructive" : secondAuthorStatus === "found" ? "border-green-500" : ""}
+                    />
+                    {secondAuthorStatus === "checking" && <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
+                    {secondAuthorStatus === "found" && <CheckCircle2 className="absolute right-3 top-2.5 h-4 w-4 text-green-500" />}
+                    {secondAuthorStatus === "not_found" && <XCircle className="absolute right-3 top-2.5 h-4 w-4 text-destructive" />}
+                  </div>
+                </div>
+              ) : (
+                <div className="relative">
                   <Input
-                    id="secondAuthorIdNumber"
-                    value={secondAuthorIdNumber}
-                    onChange={(e) => setSecondAuthorIdNumber(e.target.value)}
-                    placeholder="Número de documento"
-                    maxLength={20}
+                    type="email"
+                    value={secondAuthorEmail}
+                    onChange={(e) => setSecondAuthorEmail(e.target.value)}
+                    placeholder="correo@ejemplo.com"
                     className={secondAuthorStatus === "not_found" ? "border-destructive" : secondAuthorStatus === "found" ? "border-green-500" : ""}
                   />
-                  {secondAuthorStatus === "checking" && (
-                    <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
-                  )}
-                  {secondAuthorStatus === "found" && (
-                    <CheckCircle2 className="absolute right-3 top-2.5 h-4 w-4 text-green-500" />
-                  )}
-                  {secondAuthorStatus === "not_found" && (
-                    <XCircle className="absolute right-3 top-2.5 h-4 w-4 text-destructive" />
-                  )}
+                  {secondAuthorStatus === "checking" && <Loader2 className="absolute right-3 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
+                  {secondAuthorStatus === "found" && <CheckCircle2 className="absolute right-3 top-2.5 h-4 w-4 text-green-500" />}
+                  {secondAuthorStatus === "not_found" && <XCircle className="absolute right-3 top-2.5 h-4 w-4 text-destructive" />}
                 </div>
-              </div>
+              )}
+
               {secondAuthorStatus === "found" && (
                 <p className="text-xs text-green-600 flex items-center gap-1">
                   <CheckCircle2 className="h-3 w-3" /> {secondAuthorName}
