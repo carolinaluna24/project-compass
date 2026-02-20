@@ -82,6 +82,13 @@ export default function EndorseAnteproject() {
       });
       if (error) throw error;
 
+      // Si se aprueba el aval, cambiar system_state a AVALADO
+      if (approved) {
+        await supabase.from("project_stages").update({
+          system_state: "AVALADO" as any,
+        }).eq("id", stage.id);
+      }
+
       // Evento de auditoría
       await supabase.from("audit_events").insert({
         project_id: stage.project_id,

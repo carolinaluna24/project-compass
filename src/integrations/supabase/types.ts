@@ -850,6 +850,7 @@ export type Database = {
       system_state:
         | "BORRADOR"
         | "RADICADA"
+        | "AVALADO"
         | "EN_REVISION"
         | "CON_OBSERVACIONES"
         | "CERRADA"
@@ -998,6 +999,7 @@ export const Constants = {
       system_state: [
         "BORRADOR",
         "RADICADA",
+        "AVALADO",
         "EN_REVISION",
         "CON_OBSERVACIONES",
         "CERRADA",
