@@ -50,16 +50,18 @@ export default function ConsolidateInformeFinal() {
     if (stageData) {
       const { data: proj } = await supabase.from("projects").select("*, programs(name)").eq("id", stageData.project_id).maybeSingle();
       setProject(proj);
-      // Obtener la última submission para filtrar evaluaciones relevantes
-      const { data: latestSub } = await supabase
+      // Obtener las últimas 2 submissions
+      const { data: subs } = await supabase
         .from("submissions")
-        .select("id")
+        .select("id, version")
         .eq("project_stage_id", stageId)
         .order("version", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .limit(2);
 
-      // Cargar solo evaluaciones de la última submission
+      const latestSub = subs?.[0] || null;
+      const previousSub = subs?.[1] || null;
+
+      // Cargar evaluaciones de la última submission
       let evalsList: any[] = [];
       if (latestSub) {
         const { data: evals } = await supabase
@@ -69,6 +71,23 @@ export default function ConsolidateInformeFinal() {
           .eq("submission_id", latestSub.id);
         evalsList = evals || [];
       }
+
+      // Si es versión > 1, traer evaluaciones APROBADO de la versión anterior
+      if (latestSub && latestSub.version > 1 && previousSub) {
+        const { data: prevEvals } = await supabase
+          .from("evaluations")
+          .select("*")
+          .eq("project_stage_id", stageId)
+          .eq("submission_id", previousSub.id);
+
+        const currentEvaluatorIds = new Set(evalsList.map(e => e.evaluator_id));
+        for (const pe of (prevEvals || [])) {
+          if (pe.official_result === "APROBADO" && !currentEvaluatorIds.has(pe.evaluator_id)) {
+            evalsList.push({ ...pe, _carriedOver: true });
+          }
+        }
+      }
+
       // Fetch profiles separately (no FK relation)
       const evaluatorIds = [...new Set(evalsList.map(e => e.evaluator_id))];
       let profilesMap: Record<string, any> = {};
@@ -169,7 +188,10 @@ export default function ConsolidateInformeFinal() {
                     <Icon className={`h-4 w-4 ${color}`} />
                     <span className="font-medium text-sm">{(ev.user_profiles as any)?.full_name || (ev.user_profiles as any)?.email}</span>
                   </div>
-                  <Badge variant="outline" className="text-xs">{resultLabels[ev.official_result] || ev.official_result}</Badge>
+                  <div className="flex items-center gap-1">
+                    {ev._carriedOver && <Badge variant="secondary" className="text-xs">Versión anterior</Badge>}
+                    <Badge variant="outline" className="text-xs">{resultLabels[ev.official_result] || ev.official_result}</Badge>
+                  </div>
                 </div>
                 {ev.observations && <p className="text-sm text-muted-foreground">📝 {ev.observations}</p>}
                 <p className="text-xs text-muted-foreground">{new Date(ev.created_at).toLocaleString("es-CO")}</p>

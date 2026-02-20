@@ -65,10 +65,11 @@ export default function SubmitAnteproject() {
       });
       if (subErr) throw subErr;
 
-      // Actualizar estado de la etapa a RADICADA
+      // Si es corrección (versión > 1), saltar aval e ir directo a EN_REVISION
+      const newState = version > 1 ? "EN_REVISION" : "RADICADA";
       const { error: stageErr } = await supabase
         .from("project_stages")
-        .update({ system_state: "RADICADA" })
+        .update({ system_state: newState as any })
         .eq("id", stage.id);
       if (stageErr) throw stageErr;
 
