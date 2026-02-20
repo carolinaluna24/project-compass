@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { InlineSpinner } from "@/components/LoadingSpinner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
@@ -92,7 +93,7 @@ export default function JurorDashboard() {
   }
 
   if (loading) {
-    return <div className="py-8 text-center text-muted-foreground animate-pulse">Cargando asignaciones...</div>;
+    return <InlineSpinner text="Cargando asignaciones..." />;
   }
 
   const pending = assignments.filter((a) => !a.alreadyEvaluated);

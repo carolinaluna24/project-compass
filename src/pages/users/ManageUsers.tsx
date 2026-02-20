@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { InlineSpinner } from "@/components/LoadingSpinner";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -161,7 +162,7 @@ export default function ManageUsers() {
     return "—";
   };
 
-  if (loading) return <div className="animate-pulse text-muted-foreground py-8 text-center">Cargando...</div>;
+  if (loading) return <InlineSpinner text="Cargando..." />;
 
   return (
     <div className="space-y-6">

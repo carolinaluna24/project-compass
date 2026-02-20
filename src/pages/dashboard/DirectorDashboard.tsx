@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { InlineSpinner } from "@/components/LoadingSpinner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
@@ -48,7 +49,7 @@ export default function DirectorDashboard() {
     setLoading(false);
   }
 
-  if (loading) return <div className="py-8 text-center text-muted-foreground animate-pulse">Cargando...</div>;
+  if (loading) return <InlineSpinner text="Cargando..." />;
 
   const statusColor: Record<string, string> = { VIGENTE: "bg-success text-success-foreground", FINALIZADO: "bg-muted text-muted-foreground" };
 

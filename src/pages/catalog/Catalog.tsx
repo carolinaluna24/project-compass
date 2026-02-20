@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { InlineSpinner } from "@/components/LoadingSpinner";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -75,7 +76,7 @@ export default function Catalog() {
   });
 
   if (loading) {
-    return <div className="animate-pulse text-muted-foreground py-8 text-center">Cargando catálogo...</div>;
+    return <InlineSpinner text="Cargando catálogo..." />;
   }
 
   return (

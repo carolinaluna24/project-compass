@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { InlineSpinner } from "@/components/LoadingSpinner";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -83,7 +84,7 @@ export default function CoordinatorReports() {
   }
 
   if (loading) {
-    return <div className="animate-pulse text-muted-foreground py-8 text-center">Cargando reportes...</div>;
+    return <InlineSpinner text="Cargando reportes..." />;
   }
 
   // Derive available years from projects
