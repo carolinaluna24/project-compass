@@ -16,14 +16,14 @@ import { Textarea } from "@/components/ui/textarea";
  */
 
 function getGradeLabel(grade: number): string {
-  if (grade < 69) return "REPROBADA";
+  if (grade < 70) return "REPROBADA";
   if (grade <= 94) return "APROBADA";
   if (grade <= 99) return "MERITORIA";
   return "LAUREADA";
 }
 
 function getGradeOfficialState(grade: number): string {
-  if (grade < 69) return "NO_APROBADA";
+  if (grade < 70) return "NO_APROBADA";
   return "APROBADA";
 }
 
@@ -175,7 +175,7 @@ export default function RecordDefenseResult() {
         <CardHeader>
           <CardTitle>Registrar Resultado de Sustentación</CardTitle>
           <CardDescription>
-            Escala: Reprobada (&lt;69) · Aprobada (70-94) · Meritoria (95-99) · Laureada (100)
+            Escala: Reprobada (0-69) · Aprobada (70-94) · Meritoria (95-99) · Laureada (100)
           </CardDescription>
         </CardHeader>
         <CardContent>
