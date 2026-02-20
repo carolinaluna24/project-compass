@@ -281,10 +281,10 @@ export default function StudentDashboard() {
       await supabase.from("audit_events").insert({
         project_id: project.id, user_id: user.id,
         event_type: "ENDORSEMENT_REQUESTED",
-        description: `Estudiante solicita aval del director para ${stage.stage_name}`,
+        description: `Estudiante solicita aval del asesor para ${stage.stage_name}`,
         metadata: { stage_id: stage.id, stage_name: stage.stage_name },
       });
-      toast({ title: "Solicitud de aval enviada", description: "Tu director será notificado." });
+      toast({ title: "Solicitud de aval enviada", description: "Tu asesor será notificado." });
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
@@ -326,7 +326,7 @@ export default function StudentDashboard() {
       if (!hasEndorsement) {
         actions.push(
           <Button key="endorse" size="sm" variant="secondary" className="text-xs gap-1" onClick={() => handleRequestEndorsement(stage)}>
-            <Send className="h-3 w-3" />Solicitar Aval al Director
+            <Send className="h-3 w-3" />Solicitar Aval al Asesor
           </Button>
         );
       }
@@ -361,7 +361,7 @@ export default function StudentDashboard() {
         <CardContent className="space-y-2 text-sm">
           <p><span className="text-muted-foreground">Programa:</span> {project.programs?.name}</p>
           <p><span className="text-muted-foreground">Modalidad:</span> {project.modalities?.name}</p>
-          <p><span className="text-muted-foreground">Director:</span> {project.user_profiles?.full_name || <span className="text-muted-foreground italic">Sin asignar</span>}</p>
+          <p><span className="text-muted-foreground">Asesor:</span> {project.user_profiles?.full_name || <span className="text-muted-foreground italic">Sin asignar</span>}</p>
         </CardContent>
       </Card>
 

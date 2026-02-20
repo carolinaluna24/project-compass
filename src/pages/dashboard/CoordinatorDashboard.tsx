@@ -40,7 +40,7 @@ export default function CoordinatorDashboard() {
       supabase.from("project_stages").select("*, projects(id, title, programs(name))").eq("stage_name", "ANTEPROYECTO").neq("system_state", "CERRADA"),
       supabase.from("project_stages").select("*, projects(id, title, programs(name))").eq("stage_name", "INFORME_FINAL").neq("system_state", "CERRADA"),
       supabase.from("project_stages").select("*, projects(id, title, programs(name))").eq("stage_name", "SUSTENTACION").neq("system_state", "CERRADA"),
-      supabase.from("user_roles").select("user_id").eq("role", "DIRECTOR"),
+      supabase.from("user_roles").select("user_id").eq("role", "ASESOR"),
       supabase.from("user_roles").select("user_id").eq("role", "JUROR"),
       supabase.from("project_members").select("project_id, user_id, role").eq("role", "AUTHOR"),
     ]);
@@ -89,8 +89,8 @@ export default function CoordinatorDashboard() {
     VENCIDO: "bg-destructive text-destructive-foreground", CANCELADO: "bg-destructive/80 text-destructive-foreground",
   };
 
-  // Proyectos sin director asignado
-  const projectsWithoutDirector = projects.filter(p => !p.director_id && p.global_status === "VIGENTE");
+  // Proyectos sin asesor asignado
+  const projectsWithoutAsesor = projects.filter(p => !p.asesor_id && p.global_status === "VIGENTE");
 
   function getStageAction(stage: any, type: string) {
     if (type === "ANTEPROYECTO") {
@@ -148,16 +148,16 @@ export default function CoordinatorDashboard() {
         <Card><CardContent className="flex items-center gap-3 py-4"><div className="rounded-lg bg-success/10 p-2.5"><GraduationCap className="h-5 w-5 text-success" /></div><div><p className="text-2xl font-bold">{sustentacionStages.length}</p><p className="text-xs text-muted-foreground">Sustentaciones</p></div></CardContent></Card>
       </div>
 
-      {/* Proyectos sin director */}
-      {projectsWithoutDirector.length > 0 && (
+      {/* Proyectos sin asesor */}
+      {projectsWithoutAsesor.length > 0 && (
         <Card className="border-warning/50">
-          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4 text-warning" />Proyectos sin Director ({projectsWithoutDirector.length})</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4 text-warning" />Proyectos sin Asesor ({projectsWithoutAsesor.length})</CardTitle></CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {projectsWithoutDirector.map((p) => (
+              {projectsWithoutAsesor.map((p) => (
                 <div key={p.id} className="flex items-center justify-between rounded-lg border p-3">
                   <div><p className="font-medium text-sm">{p.title}</p><p className="text-xs text-muted-foreground">{p.programs?.name}</p></div>
-                  <Link to={`/projects/${p.id}`}><Button size="sm" variant="outline" className="text-xs gap-1"><Users className="h-3 w-3" />Asignar Director</Button></Link>
+                  <Link to={`/projects/${p.id}`}><Button size="sm" variant="outline" className="text-xs gap-1"><Users className="h-3 w-3" />Asignar Asesor</Button></Link>
                 </div>
               ))}
             </div>
@@ -191,7 +191,7 @@ export default function CoordinatorDashboard() {
         <CardHeader><CardTitle className="text-base">Todos los Proyectos</CardTitle></CardHeader>
         <CardContent>
           <Table>
-            <TableHeader><TableRow><TableHead>Título</TableHead><TableHead>Autor(es)</TableHead><TableHead>Programa</TableHead><TableHead>Director</TableHead><TableHead>Estado</TableHead><TableHead>Fecha</TableHead><TableHead></TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Título</TableHead><TableHead>Autor(es)</TableHead><TableHead>Programa</TableHead><TableHead>Asesor</TableHead><TableHead>Estado</TableHead><TableHead>Fecha</TableHead><TableHead></TableHead></TableRow></TableHeader>
             <TableBody>
               {projects.map((p) => (
                 <TableRow key={p.id}>

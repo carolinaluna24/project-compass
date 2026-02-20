@@ -191,7 +191,7 @@ export default function AssignJurors() {
           <CardContent className="py-8 text-center space-y-3">
             <AlertCircle className="h-10 w-10 text-warning mx-auto" />
             <p className="font-medium">Aval pendiente</p>
-            <p className="text-sm text-muted-foreground">El director debe dar su aval antes de asignar jurados.</p>
+            <p className="text-sm text-muted-foreground">El asesor debe dar su aval antes de asignar jurados.</p>
             <Button variant="outline" onClick={() => navigate("/dashboard")}>
               Volver
             </Button>
