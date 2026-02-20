@@ -56,7 +56,7 @@ export default function CreateProject() {
   const [modalityConfigs, setModalityConfigs] = useState<ModalityConfig[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
-  // Cargar programas, modalidades y configuración al montar
+  // Cargar programas, modalidades, configuración y programa del estudiante al montar
   async function loadLookups() {
     const [{ data: progs }, { data: mods }, { data: configs }] = await Promise.all([
       supabase.from("programs").select("*"),
@@ -66,11 +66,23 @@ export default function CreateProject() {
     setPrograms(progs || []);
     setModalities(mods || []);
     setModalityConfigs((configs as ModalityConfig[]) || []);
+
+    // Auto-asignar programa del estudiante desde su perfil
+    if (user) {
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("program_id")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (profile?.program_id) {
+        setProgramId(profile.program_id);
+      }
+    }
   }
 
   useEffect(() => {
     loadLookups();
-  }, []);
+  }, [user]);
 
   // Validar documento del segundo autor con debounce
   useEffect(() => {
@@ -277,41 +289,35 @@ export default function CreateProject() {
               />
             </div>
 
-            {/* Programa y Modalidad */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Programa (auto-asignado) */}
+            {programId && (
               <div className="space-y-2">
                 <Label>Programa</Label>
-                <Select value={programId} onValueChange={setProgramId} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {programs.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <p className="text-sm text-muted-foreground border rounded-md px-3 py-2 bg-muted/30">
+                  {programs.find((p) => p.id === programId)?.name || "Cargando..."}
+                </p>
               </div>
+            )}
 
-              <div className="space-y-2">
-                <Label>Modalidad</Label>
-                <Select value={modalityId} onValueChange={setModalityId} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {modalities.map((m) => {
-                      const config = modalityConfigs.find((c) => c.modality_id === m.id);
-                      const impl = config?.implemented ?? false;
-                      return (
-                        <SelectItem key={m.id} value={m.id}>
-                          {m.name} {impl ? "" : "(pendiente)"}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
+            {/* Modalidad */}
+            <div className="space-y-2">
+              <Label>Modalidad</Label>
+              <Select value={modalityId} onValueChange={setModalityId} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  {modalities.map((m) => {
+                    const config = modalityConfigs.find((c) => c.modality_id === m.id);
+                    const impl = config?.implemented ?? false;
+                    return (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.name} {impl ? "" : "(pendiente)"}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Aviso de modalidad no implementada */}

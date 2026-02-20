@@ -24,7 +24,7 @@ const statusColors: Record<string, string> = {
 };
 
 const stateLabels: Record<string, string> = {
-  BORRADOR: "Borrador", RADICADA: "Radicada", EN_REVISION: "En Revisión",
+  BORRADOR: "Borrador", RADICADA: "Radicada", AVALADO: "Avalado", EN_REVISION: "En Revisión",
   CON_OBSERVACIONES: "Con Observaciones", CERRADA: "Cerrada",
 };
 
@@ -75,7 +75,9 @@ export default function StudentDashboard() {
   async function loadProject() {
     setLoading(true);
     const { data: memberships } = await supabase
-      .from("project_members").select("project_id").eq("user_id", user!.id).eq("role", "AUTHOR");
+      .from("project_members").select("project_id, projects!inner(global_status)")
+      .eq("user_id", user!.id).eq("role", "AUTHOR")
+      .eq("projects.global_status", "VIGENTE");
 
     if (memberships && memberships.length > 0) {
       const projectId = memberships[0].project_id;
@@ -318,7 +320,7 @@ export default function StudentDashboard() {
       );
     }
 
-    // Request endorsement (ANTEPROYECTO, INFORME_FINAL when RADICADA)
+    // Request endorsement (ANTEPROYECTO, INFORME_FINAL when RADICADA and no endorsement yet)
     if ((stage.stage_name === "ANTEPROYECTO" || stage.stage_name === "INFORME_FINAL") && stage.system_state === "RADICADA") {
       const hasEndorsement = (endorsementsByStage[stage.id] || []).length > 0;
       if (!hasEndorsement) {
