@@ -82,7 +82,7 @@ export default function StudentDashboard() {
     if (memberships && memberships.length > 0) {
       const projectId = memberships[0].project_id;
       const { data: proj } = await supabase
-        .from("projects").select("*, programs(name), modalities(name), user_profiles!projects_director_id_fkey(full_name)")
+        .from("projects").select("*, programs(name), modalities(name), user_profiles!projects_asesor_id_fkey(full_name)")
         .eq("id", projectId).maybeSingle();
       setProject(proj);
 

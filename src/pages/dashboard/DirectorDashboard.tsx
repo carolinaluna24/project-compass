@@ -18,7 +18,7 @@ export default function DirectorDashboard() {
   async function loadProjects() {
     const { data } = await supabase
       .from("projects").select("*, programs(name), modalities(name)")
-      .eq("director_id", user!.id).order("created_at", { ascending: false });
+      .eq("asesor_id", user!.id).order("created_at", { ascending: false });
 
     const enriched = await Promise.all(
       (data || []).map(async (p) => {

@@ -35,12 +35,12 @@ export default function CoordinatorDashboard() {
   async function loadData() {
     setLoading(true);
     const [projectsRes, proposalsRes, anteRes, informeRes, sustRes, dirRolesRes, jurorRolesRes, membersRes] = await Promise.all([
-      supabase.from("projects").select("*, programs(name), modalities(name), user_profiles!projects_director_id_fkey(full_name)").order("created_at", { ascending: false }),
+      supabase.from("projects").select("*, programs(name), modalities(name), user_profiles!projects_asesor_id_fkey(full_name)").order("created_at", { ascending: false }),
       supabase.from("project_stages").select("*, projects(id, title, programs(name))").eq("stage_name", "PROPUESTA").eq("system_state", "RADICADA"),
       supabase.from("project_stages").select("*, projects(id, title, programs(name))").eq("stage_name", "ANTEPROYECTO").neq("system_state", "CERRADA"),
       supabase.from("project_stages").select("*, projects(id, title, programs(name))").eq("stage_name", "INFORME_FINAL").neq("system_state", "CERRADA"),
       supabase.from("project_stages").select("*, projects(id, title, programs(name))").eq("stage_name", "SUSTENTACION").neq("system_state", "CERRADA"),
-      supabase.from("user_roles").select("user_id").eq("role", "DIRECTOR"),
+      supabase.from("user_roles").select("user_id").eq("role", "ASESOR"),
       supabase.from("user_roles").select("user_id").eq("role", "JUROR"),
       supabase.from("project_members").select("project_id, user_id, role").eq("role", "AUTHOR"),
     ]);
@@ -90,7 +90,7 @@ export default function CoordinatorDashboard() {
   };
 
   // Proyectos sin asesor asignado
-  const projectsWithoutDirector = projects.filter(p => !p.director_id && p.global_status === "VIGENTE");
+  const projectsWithoutDirector = projects.filter(p => !p.asesor_id && p.global_status === "VIGENTE");
 
   function getStageAction(stage: any, type: string) {
     if (type === "ANTEPROYECTO") {
