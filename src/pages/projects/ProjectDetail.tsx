@@ -29,6 +29,7 @@ export default function ProjectDetail() {
   const [deadlinesByStage, setDeadlinesByStage] = useState<Record<string, any>>({});
   const [submissionsByStage, setSubmissionsByStage] = useState<Record<string, any[]>>({});
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+  const [evaluationsByStage, setEvaluationsByStage] = useState<Record<string, any[]>>({});
   const [directors, setDirectors] = useState<any[]>([]);
   const [selectedDirector, setSelectedDirector] = useState("");
   const [assigningDirector, setAssigningDirector] = useState(false);
@@ -106,7 +107,33 @@ export default function ProjectDetail() {
       }
     }
 
-    // Fetch member profiles separately (no FK between project_members and user_profiles)
+    // Cargar evaluaciones por etapa
+    if (stagesList.length > 0) {
+      const stageIds = stagesList.map((s: any) => s.id);
+      const { data: evals } = await supabase
+        .from("evaluations")
+        .select("*")
+        .in("project_stage_id", stageIds);
+
+      if (evals && evals.length > 0) {
+        const evaluatorIds = [...new Set(evals.map((e: any) => e.evaluator_id))];
+        const { data: evalProfiles } = await supabase
+          .from("user_profiles")
+          .select("id, full_name")
+          .in("id", evaluatorIds);
+        const profMap = (evalProfiles || []).reduce((acc: any, p: any) => { acc[p.id] = p; return acc; }, {});
+
+        const evalsMap: Record<string, any[]> = {};
+        for (const ev of evals) {
+          const enriched = { ...ev, _evaluator: profMap[ev.evaluator_id] };
+          if (!evalsMap[ev.project_stage_id!]) evalsMap[ev.project_stage_id!] = [];
+          evalsMap[ev.project_stage_id!].push(enriched);
+        }
+        setEvaluationsByStage(evalsMap);
+      } else {
+        setEvaluationsByStage({});
+      }
+    }
     const rawMembers = membersRes.data || [];
     if (rawMembers.length > 0) {
       const userIds = rawMembers.map((m: any) => m.user_id);
@@ -345,6 +372,23 @@ export default function ProjectDetail() {
                             ? <span className="font-semibold">(Vence hoy)</span>
                             : <span>({daysLeft} {daysLeft === 1 ? "día" : "días"} restantes)</span>}
                       </span>
+                    </div>
+                  )}
+                  {evaluationsByStage[s.id]?.length > 0 && (
+                    <div className="mt-2 space-y-1.5">
+                      <p className="text-xs font-semibold text-muted-foreground">Evaluaciones de Jurados:</p>
+                      {evaluationsByStage[s.id].map((ev: any) => (
+                        <div key={ev.id} className="flex items-center gap-2 text-xs flex-wrap">
+                          <User className="h-3 w-3 text-muted-foreground shrink-0" />
+                          <span className="font-medium">{ev._evaluator?.full_name || "Evaluador"}</span>
+                          <Badge variant={ev.official_result === "APROBADA" ? "default" : ev.official_result === "NO_APROBADA" ? "destructive" : "outline"} className="text-[10px]">
+                            {ev.official_result || "Pendiente"}
+                          </Badge>
+                          {ev.observations && (
+                            <span className="text-muted-foreground">— {ev.observations}</span>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
