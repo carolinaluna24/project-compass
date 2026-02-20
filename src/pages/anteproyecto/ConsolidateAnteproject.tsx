@@ -87,13 +87,12 @@ export default function ConsolidateAnteproject() {
       // Calcular resultado consolidado
       if (evalsList.length >= 2) {
         const results = evalsList.map((e) => e.official_result);
-        if (results.every((r) => r === "APROBADO")) {
-          setConsolidatedResult("APROBADA");
-        } else if (results.every((r) => r === "NO_APROBADO")) {
+        if (results.includes("NO_APROBADO")) {
           setConsolidatedResult("NO_APROBADA");
-        } else {
-          // Jurados no se ponen de acuerdo => Con Modificaciones
+        } else if (results.includes("APLAZADO_POR_MODIFICACIONES")) {
           setConsolidatedResult("APROBADA_CON_MODIFICACIONES");
+        } else {
+          setConsolidatedResult("APROBADA");
         }
       }
     }
