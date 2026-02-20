@@ -33,6 +33,8 @@ export default function CoordinatorDashboard() {
 
   useEffect(() => { loadData(); }, []);
 
+  const [stageAssignments, setStageAssignments] = useState<Record<string, boolean>>({});
+
   async function loadData() {
     setLoading(true);
     const [projectsRes, proposalsRes, anteRes, informeRes, sustRes, dirRolesRes, jurorRolesRes, membersRes] = await Promise.all([
@@ -50,6 +52,16 @@ export default function CoordinatorDashboard() {
     setAnteproyectoStages(anteRes.data || []);
     setInformeFinalStages(informeRes.data || []);
     setSustentacionStages(sustRes.data || []);
+
+    // Cargar asignaciones existentes para determinar si ya hay jurados asignados
+    const { data: allAssignments } = await supabase
+      .from("assignments")
+      .select("project_id, stage_name");
+    const assignMap: Record<string, boolean> = {};
+    (allAssignments || []).forEach((a) => {
+      assignMap[`${a.project_id}_${a.stage_name}`] = true;
+    });
+    setStageAssignments(assignMap);
 
     // Cargar nombres de autores
     const authorMembers = membersRes.data || [];
@@ -107,11 +119,15 @@ export default function CoordinatorDashboard() {
     const { stage_name, system_state, id } = stage;
     if (stage_name === "PROPUESTA" && system_state === "RADICADA") return `/proposals/${id}/evaluate`;
     if (stage_name === "ANTEPROYECTO") {
-      if (system_state === "RADICADA" || system_state === "AVALADO") return `/anteproyecto/${id}/assign-jurors`;
+      const hasJurors = stageAssignments[`${projectId}_ANTEPROYECTO`];
+      if ((system_state === "RADICADA" || system_state === "AVALADO") && !hasJurors) return `/anteproyecto/${id}/assign-jurors`;
+      if ((system_state === "RADICADA" || system_state === "AVALADO") && hasJurors) return `/anteproyecto/${id}/consolidate`;
       if (system_state === "EN_REVISION") return `/anteproyecto/${id}/consolidate`;
     }
     if (stage_name === "INFORME_FINAL") {
-      if (system_state === "RADICADA" || system_state === "AVALADO") return `/informe-final/${id}/assign-jurors`;
+      const hasJurors = stageAssignments[`${projectId}_INFORME_FINAL`];
+      if ((system_state === "RADICADA" || system_state === "AVALADO") && !hasJurors) return `/informe-final/${id}/assign-jurors`;
+      if ((system_state === "RADICADA" || system_state === "AVALADO") && hasJurors) return `/informe-final/${id}/consolidate`;
       if (system_state === "EN_REVISION") return `/informe-final/${id}/consolidate`;
     }
     if (stage_name === "SUSTENTACION") {
@@ -123,11 +139,17 @@ export default function CoordinatorDashboard() {
 
   function getStageAction(stage: any, type: string) {
     if (type === "ANTEPROYECTO") {
-      if (stage.system_state === "RADICADA") return <Link to={`/anteproyecto/${stage.id}/assign-jurors`}><Button size="sm" variant="outline" className="text-xs">Asignar Jurados</Button></Link>;
+      const hasJurors = stageAssignments[`${stage.projects?.id}_ANTEPROYECTO`];
+      if (stage.system_state === "RADICADA" && !hasJurors) return <Link to={`/anteproyecto/${stage.id}/assign-jurors`}><Button size="sm" variant="outline" className="text-xs">Asignar Jurados</Button></Link>;
+      if (stage.system_state === "AVALADO" && !hasJurors) return <Link to={`/anteproyecto/${stage.id}/assign-jurors`}><Button size="sm" variant="outline" className="text-xs">Asignar Jurados</Button></Link>;
+      if ((stage.system_state === "RADICADA" || stage.system_state === "AVALADO") && hasJurors) return <Link to={`/anteproyecto/${stage.id}/consolidate`}><Button size="sm" variant="outline" className="text-xs">En espera de evaluaciones</Button></Link>;
       if (stage.system_state === "EN_REVISION") return <Link to={`/anteproyecto/${stage.id}/consolidate`}><Button size="sm" variant="outline" className="text-xs">Consolidar</Button></Link>;
     }
     if (type === "INFORME_FINAL") {
-      if (stage.system_state === "RADICADA") return <Link to={`/informe-final/${stage.id}/assign-jurors`}><Button size="sm" variant="outline" className="text-xs">Asignar Jurados</Button></Link>;
+      const hasJurors = stageAssignments[`${stage.projects?.id}_INFORME_FINAL`];
+      if (stage.system_state === "RADICADA" && !hasJurors) return <Link to={`/informe-final/${stage.id}/assign-jurors`}><Button size="sm" variant="outline" className="text-xs">Asignar Jurados</Button></Link>;
+      if (stage.system_state === "AVALADO" && !hasJurors) return <Link to={`/informe-final/${stage.id}/assign-jurors`}><Button size="sm" variant="outline" className="text-xs">Asignar Jurados</Button></Link>;
+      if ((stage.system_state === "RADICADA" || stage.system_state === "AVALADO") && hasJurors) return <Link to={`/informe-final/${stage.id}/consolidate`}><Button size="sm" variant="outline" className="text-xs">En espera de evaluaciones</Button></Link>;
       if (stage.system_state === "EN_REVISION") return <Link to={`/informe-final/${stage.id}/consolidate`}><Button size="sm" variant="outline" className="text-xs">Consolidar</Button></Link>;
     }
     if (type === "SUSTENTACION") {
