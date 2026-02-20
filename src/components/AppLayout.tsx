@@ -3,16 +3,13 @@ import { Outlet, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { RoleProvider } from "@/contexts/RoleContext";
 import AppSidebar from "@/components/AppSidebar";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function AppLayout() {
   const { user, roles, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Cargando...</div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (!user) {
