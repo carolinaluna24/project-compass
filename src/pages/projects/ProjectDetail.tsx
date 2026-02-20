@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "@/components/LoadingSpinner.css";
+import { InlineSpinner } from "@/components/LoadingSpinner";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -188,15 +188,7 @@ export default function ProjectDetail() {
     }
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center py-16">
-      <div className="win10-spinner">
-        {[...Array(5)].map((_, i) => (
-          <div key={i} className="dot" style={{ animationDelay: `${i * 0.15}s` }} />
-        ))}
-      </div>
-    </div>
-  );
+  if (loading) return <InlineSpinner text="Cargando..." />;
   if (!project) return <div className="py-8 text-center text-muted-foreground">Proyecto no encontrado</div>;
 
   const statusColor: Record<string, string> = {

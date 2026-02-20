@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { InlineSpinner } from "@/components/LoadingSpinner";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -78,7 +79,7 @@ export default function ProjectsReport() {
   }
 
   if (loading) {
-    return <div className="animate-pulse text-muted-foreground py-8 text-center">Cargando reporte...</div>;
+    return <InlineSpinner text="Cargando reporte..." />;
   }
 
   const statusColors: Record<string, string> = {

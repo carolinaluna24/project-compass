@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { InlineSpinner } from "@/components/LoadingSpinner";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -57,7 +58,7 @@ export default function DeadlinesRisk() {
   }, []);
 
   if (loading) {
-    return <div className="animate-pulse text-muted-foreground py-8 text-center">Cargando plazos...</div>;
+    return <InlineSpinner text="Cargando plazos..." />;
   }
 
   const filtered = deadlines.filter(d => {

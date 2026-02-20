@@ -2,6 +2,7 @@
  * StudentDashboard.tsx - Dashboard del estudiante con upload de documentos por etapa
  */
 import { useEffect, useState } from "react";
+import { InlineSpinner } from "@/components/LoadingSpinner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -306,7 +307,7 @@ export default function StudentDashboard() {
     }
   }
 
-  if (loading) return <div className="animate-pulse text-muted-foreground py-8 text-center">Cargando proyecto...</div>;
+  if (loading) return <InlineSpinner text="Cargando proyecto..." />;
 
   if (!project) {
     return (
