@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Clock, User, FileText, CheckCircle, AlertCircle, Users, CalendarClock, ExternalLink } from "lucide-react";
+import { Clock, User, FileText, CheckCircle, AlertCircle, Users, CalendarClock, ExternalLink, ClipboardCheck } from "lucide-react";
 
 const eventIcons: Record<string, React.ElementType> = {
   PROJECT_CREATED: FileText,
@@ -168,6 +168,28 @@ export default function ProjectDetail() {
     CANCELADO: "bg-destructive/80 text-destructive-foreground",
   };
 
+  // Determinar enlace de evaluación según etapa actual
+  const currentStage = stages.length > 0 ? stages[stages.length - 1] : null;
+  function getEvalLink() {
+    if (!currentStage || primaryRole !== "COORDINATOR") return null;
+    const { stage_name, system_state, id } = currentStage;
+    if (stage_name === "PROPUESTA" && system_state === "RADICADA") return `/proposals/${id}/evaluate`;
+    if (stage_name === "ANTEPROYECTO") {
+      if (system_state === "RADICADA" || system_state === "AVALADO") return `/anteproyecto/${id}/assign-jurors`;
+      if (system_state === "EN_REVISION") return `/anteproyecto/${id}/consolidate`;
+    }
+    if (stage_name === "INFORME_FINAL") {
+      if (system_state === "RADICADA" || system_state === "AVALADO") return `/informe-final/${id}/assign-jurors`;
+      if (system_state === "EN_REVISION") return `/informe-final/${id}/consolidate`;
+    }
+    if (stage_name === "SUSTENTACION") {
+      if (system_state === "BORRADOR") return `/sustentacion/${id}/schedule`;
+      if (system_state === "RADICADA") return `/sustentacion/${id}/record-result`;
+    }
+    return null;
+  }
+  const evalLink = getEvalLink();
+
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       <div className="flex items-start justify-between">
@@ -175,9 +197,19 @@ export default function ProjectDetail() {
           <h1 className="text-2xl font-bold">{project.title}</h1>
           <p className="text-muted-foreground text-sm">{project.description}</p>
         </div>
-        <Badge className={statusColor[project.global_status] || "bg-muted"}>
-          {project.global_status}
-        </Badge>
+        <div className="flex items-center gap-2 shrink-0">
+          {evalLink && (
+            <Link to={evalLink}>
+              <Button size="sm" className="gap-1.5 shadow-sm">
+                <ClipboardCheck className="h-4 w-4" />
+                Evaluar
+              </Button>
+            </Link>
+          )}
+          <Badge className={statusColor[project.global_status] || "bg-muted"}>
+            {project.global_status}
+          </Badge>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 text-sm">
