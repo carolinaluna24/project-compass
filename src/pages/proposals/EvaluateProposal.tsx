@@ -85,7 +85,7 @@ export default function EvaluateProposal() {
       const { data: dirRoles } = await supabase
         .from("user_roles")
         .select("user_id")
-        .eq("role", "ASESOR");
+        .eq("role", "DIRECTOR");
       if (dirRoles && dirRoles.length > 0) {
         const dirIds = dirRoles.map((r) => r.user_id);
         const { data: profiles } = await supabase
@@ -133,7 +133,7 @@ export default function EvaluateProposal() {
         if (directorId) {
           await supabase
             .from("projects")
-            .update({ asesor_id: directorId })
+            .update({ director_id: directorId })
             .eq("id", stage.project_id);
         }
 

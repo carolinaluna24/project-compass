@@ -50,20 +50,6 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "assignments_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_catalog_projects"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "assignments_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_project_current_stage"
-            referencedColumns: ["project_id"]
-          },
         ]
       }
       audit_events: {
@@ -101,20 +87,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "audit_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_catalog_projects"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "audit_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_project_current_stage"
-            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -453,20 +425,6 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "project_members_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_catalog_projects"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "project_members_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_project_current_stage"
-            referencedColumns: ["project_id"]
-          },
         ]
       }
       project_stages: {
@@ -511,28 +469,14 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "project_stages_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_catalog_projects"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "project_stages_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_project_current_stage"
-            referencedColumns: ["project_id"]
-          },
         ]
       }
       projects: {
         Row: {
-          asesor_id: string | null
           created_at: string
           created_by: string
           description: string | null
+          director_id: string | null
           global_status: Database["public"]["Enums"]["global_status"]
           id: string
           modality_id: string
@@ -541,10 +485,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          asesor_id?: string | null
           created_at?: string
           created_by: string
           description?: string | null
+          director_id?: string | null
           global_status?: Database["public"]["Enums"]["global_status"]
           id?: string
           modality_id: string
@@ -553,10 +497,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          asesor_id?: string | null
           created_at?: string
           created_by?: string
           description?: string | null
+          director_id?: string | null
           global_status?: Database["public"]["Enums"]["global_status"]
           id?: string
           modality_id?: string
@@ -567,7 +511,7 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "projects_director_id_fkey"
-            columns: ["asesor_id"]
+            columns: ["director_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
@@ -777,7 +721,15 @@ export type Database = {
           project_id: string | null
           title: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "project_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       v_deadlines_risk: {
         Row: {
@@ -804,25 +756,11 @@ export type Database = {
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "project_stages_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_catalog_projects"
-            referencedColumns: ["project_id"]
-          },
-          {
-            foreignKeyName: "project_stages_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "v_project_current_stage"
-            referencedColumns: ["project_id"]
-          },
         ]
       }
       v_project_current_stage: {
         Row: {
-          asesor_id: string | null
+          director_id: string | null
           final_grade: number | null
           global_status: Database["public"]["Enums"]["global_status"] | null
           modality_id: string | null
@@ -842,8 +780,15 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "project_stages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "projects_director_id_fkey"
-            columns: ["asesor_id"]
+            columns: ["director_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
@@ -889,9 +834,9 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "STUDENT" | "COORDINATOR" | "ASESOR" | "JUROR" | "DECANO"
+      app_role: "STUDENT" | "COORDINATOR" | "DIRECTOR" | "JUROR" | "DECANO"
       global_status: "VIGENTE" | "FINALIZADO" | "VENCIDO" | "CANCELADO"
-      member_role: "AUTHOR" | "ASESOR" | "JUROR"
+      member_role: "AUTHOR" | "DIRECTOR" | "JUROR"
       official_state:
         | "APROBADA"
         | "APROBADA_CON_MODIFICACIONES"
@@ -1036,9 +981,9 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["STUDENT", "COORDINATOR", "ASESOR", "JUROR", "DECANO"],
+      app_role: ["STUDENT", "COORDINATOR", "DIRECTOR", "JUROR", "DECANO"],
       global_status: ["VIGENTE", "FINALIZADO", "VENCIDO", "CANCELADO"],
-      member_role: ["AUTHOR", "ASESOR", "JUROR"],
+      member_role: ["AUTHOR", "DIRECTOR", "JUROR"],
       official_state: [
         "APROBADA",
         "APROBADA_CON_MODIFICACIONES",

@@ -38,7 +38,7 @@ export default function ProjectDetail() {
 
   async function loadData() {
     const [projRes, stagesRes, membersRes, auditRes] = await Promise.all([
-      supabase.from("projects").select("*, programs(name), modalities(name), user_profiles!projects_asesor_id_fkey(full_name)").eq("id", projectId!).maybeSingle(),
+      supabase.from("projects").select("*, programs(name), modalities(name), user_profiles!projects_director_id_fkey(full_name)").eq("id", projectId!).maybeSingle(),
       supabase.from("project_stages").select("*").eq("project_id", projectId!).order("created_at"),
       supabase.from("project_members").select("*").eq("project_id", projectId!),
       (primaryRole === "COORDINATOR" || primaryRole === "DECANO")
@@ -73,7 +73,7 @@ export default function ProjectDetail() {
     setDeadlinesByStage(deadlineMap);
 
     // Cargar submissions por etapa (visible para DIRECTOR y COORDINATOR)
-    const isDirectorOrCoord = roles.includes("ASESOR") || roles.includes("COORDINATOR") || roles.includes("DECANO");
+    const isDirectorOrCoord = roles.includes("DIRECTOR") || roles.includes("COORDINATOR") || roles.includes("DECANO");
     if (isDirectorOrCoord && stagesList.length > 0) {
       const stageIds = stagesList.map((s: any) => s.id);
       const { data: allSubs } = await supabase
@@ -115,9 +115,9 @@ export default function ProjectDetail() {
       setMembers([]);
     }
 
-    // Cargar asesores disponibles si es coordinador
+    // Cargar directores disponibles si es coordinador
     if (primaryRole === "COORDINATOR") {
-      const { data: dirRoles } = await supabase.from("user_roles").select("user_id").eq("role", "ASESOR");
+      const { data: dirRoles } = await supabase.from("user_roles").select("user_id").eq("role", "DIRECTOR");
       if (dirRoles && dirRoles.length > 0) {
         const { data: dirProfiles } = await supabase.from("user_profiles").select("id, full_name, email").in("id", dirRoles.map(r => r.user_id));
         setDirectors(dirProfiles || []);
@@ -131,14 +131,14 @@ export default function ProjectDetail() {
     if (!selectedDirector || !projectId) return;
     setAssigningDirector(true);
     try {
-      const { error } = await supabase.from("projects").update({ asesor_id: selectedDirector }).eq("id", projectId);
+      const { error } = await supabase.from("projects").update({ director_id: selectedDirector }).eq("id", projectId);
       if (error) throw error;
 
       // Agregar como miembro del proyecto
       await supabase.from("project_members").insert({
         project_id: projectId,
         user_id: selectedDirector,
-        role: "ASESOR" as any,
+        role: "DIRECTOR" as any,
       });
 
       const { data: { user } } = await supabase.auth.getUser();
@@ -146,10 +146,10 @@ export default function ProjectDetail() {
         project_id: projectId,
         user_id: user?.id,
         event_type: "DIRECTOR_ASSIGNED",
-        description: "Asesor asignado al proyecto",
+        description: "Director asignado al proyecto",
       });
 
-      toast({ title: "Asesor asignado exitosamente" });
+      toast({ title: "Director asignado exitosamente" });
       loadData();
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -198,26 +198,26 @@ export default function ProjectDetail() {
       {/* Director */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Asesor del Proyecto</CardTitle>
+          <CardTitle className="text-sm">Director del Proyecto</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {project.asesor_id && (
+          {project.director_id && (
             <div className="flex items-center gap-3 text-sm">
               <User className="h-4 w-4 text-muted-foreground" />
               <span>{project.user_profiles?.full_name}</span>
-              <Badge variant="outline" className="text-xs">Asesor</Badge>
+              <Badge variant="outline" className="text-xs">Director</Badge>
             </div>
           )}
           {primaryRole === "COORDINATOR" && directors.length > 0 && (
             <div className="space-y-2">
-              {!project.asesor_id && (
-                <p className="text-sm text-muted-foreground">Este proyecto no tiene asesor asignado.</p>
+              {!project.director_id && (
+                <p className="text-sm text-muted-foreground">Este proyecto no tiene director asignado.</p>
               )}
               <div className="flex gap-2 items-end">
                 <div className="flex-1">
                   <Select value={selectedDirector} onValueChange={setSelectedDirector}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar asesor" />
+                      <SelectValue placeholder="Seleccionar director" />
                     </SelectTrigger>
                     <SelectContent>
                       {directors.map(d => (
@@ -227,13 +227,13 @@ export default function ProjectDetail() {
                   </Select>
                 </div>
                 <Button size="sm" onClick={handleAssignDirector} disabled={!selectedDirector || assigningDirector} className="gap-1">
-                  <Users className="h-3 w-3" />{project.asesor_id ? "Cambiar" : "Asignar"}
+                  <Users className="h-3 w-3" />{project.director_id ? "Cambiar" : "Asignar"}
                 </Button>
               </div>
             </div>
           )}
-          {!project.asesor_id && primaryRole !== "COORDINATOR" && (
-            <p className="text-sm text-muted-foreground italic">Sin asesor asignado</p>
+          {!project.director_id && primaryRole !== "COORDINATOR" && (
+            <p className="text-sm text-muted-foreground italic">Sin director asignado</p>
           )}
         </CardContent>
       </Card>
@@ -303,7 +303,7 @@ export default function ProjectDetail() {
       </Card>
 
       {/* Documentos por etapa (Director, Coordinador, Decano) */}
-      {(roles.includes("ASESOR") || roles.includes("COORDINATOR") || roles.includes("DECANO")) &&
+      {(roles.includes("DIRECTOR") || roles.includes("COORDINATOR") || roles.includes("DECANO")) &&
         Object.keys(submissionsByStage).length > 0 && (
         <Card>
           <CardHeader>

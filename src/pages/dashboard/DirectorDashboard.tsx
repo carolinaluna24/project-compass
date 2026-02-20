@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FolderOpen } from "lucide-react";
 
-/** Dashboard del asesor: muestra proyectos donde es asesor con avales pendientes */
+/** Dashboard del director: muestra proyectos donde es director con avales pendientes */
 export default function DirectorDashboard() {
   const { user } = useAuth();
   const [projects, setProjects] = useState<any[]>([]);
@@ -18,7 +18,7 @@ export default function DirectorDashboard() {
   async function loadProjects() {
     const { data } = await supabase
       .from("projects").select("*, programs(name), modalities(name)")
-      .eq("asesor_id", user!.id).order("created_at", { ascending: false });
+      .eq("director_id", user!.id).order("created_at", { ascending: false });
 
     const enriched = await Promise.all(
       (data || []).map(async (p) => {
@@ -55,13 +55,13 @@ export default function DirectorDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Panel del Asesor</h1>
-        <p className="text-muted-foreground text-sm">Proyectos bajo tu asesoría</p>
+        <h1 className="text-2xl font-bold">Panel del Director</h1>
+        <p className="text-muted-foreground text-sm">Proyectos bajo tu dirección</p>
       </div>
       {projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 space-y-4">
           <div className="rounded-full bg-muted p-6"><FolderOpen className="h-10 w-10 text-muted-foreground" /></div>
-          <p className="text-muted-foreground text-sm">No tienes proyectos asignados como asesor</p>
+          <p className="text-muted-foreground text-sm">No tienes proyectos asignados como director</p>
         </div>
       ) : (
         <div className="space-y-3">

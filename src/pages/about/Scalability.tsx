@@ -80,8 +80,8 @@ export default function Scalability() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
-              { icon: Users, name: "users / user_profiles / user_roles", desc: "Autenticación y roles (STUDENT, COORDINATOR, ASESOR, JUROR)" },
-              { icon: FileText, name: "projects / project_members", desc: "Expediente del proyecto con autores y asesor" },
+              { icon: Users, name: "users / user_profiles / user_roles", desc: "Autenticación y roles (STUDENT, COORDINATOR, DIRECTOR, JUROR)" },
+              { icon: FileText, name: "projects / project_members", desc: "Expediente del proyecto con autores y director" },
               { icon: Layers, name: "project_stages", desc: "Etapas genéricas con estados (system_state, official_state)" },
               { icon: FileText, name: "submissions", desc: "Entregables versionados (PDF/URL)" },
               { icon: Shield, name: "evaluations / evaluation_scores", desc: "Evaluaciones con rúbricas configurables por etapa" },

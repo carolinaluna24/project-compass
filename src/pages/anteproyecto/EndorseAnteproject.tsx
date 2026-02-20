@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle } from "lucide-react";
 
-/** Página para que el asesor dé aval al anteproyecto */
+/** Página para que el director dé aval al anteproyecto */
 export default function EndorseAnteproject() {
   const { stageId } = useParams<{ stageId: string }>();
   const { user } = useAuth();
@@ -94,7 +94,7 @@ export default function EndorseAnteproject() {
         project_id: stage.project_id,
         user_id: user.id,
         event_type: "ANTEPROYECTO_ENDORSED",
-        description: `Asesor ${approved ? "aprobó" : "rechazó"} el aval del anteproyecto`,
+        description: `Director ${approved ? "aprobó" : "rechazó"} el aval del anteproyecto`,
         metadata: { approved, comments },
       });
 
@@ -166,7 +166,7 @@ export default function EndorseAnteproject() {
       {/* Formulario de aval */}
       <Card>
         <CardHeader>
-          <CardTitle>Aval del Asesor</CardTitle>
+          <CardTitle>Aval del Director</CardTitle>
           <CardDescription>Revisa el anteproyecto y decide si otorgas tu aval.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

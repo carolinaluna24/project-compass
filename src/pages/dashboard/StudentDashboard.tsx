@@ -82,7 +82,7 @@ export default function StudentDashboard() {
     if (memberships && memberships.length > 0) {
       const projectId = memberships[0].project_id;
       const { data: proj } = await supabase
-        .from("projects").select("*, programs(name), modalities(name), user_profiles!projects_asesor_id_fkey(full_name)")
+        .from("projects").select("*, programs(name), modalities(name), user_profiles!projects_director_id_fkey(full_name)")
         .eq("id", projectId).maybeSingle();
       setProject(proj);
 
@@ -281,10 +281,10 @@ export default function StudentDashboard() {
       await supabase.from("audit_events").insert({
         project_id: project.id, user_id: user.id,
         event_type: "ENDORSEMENT_REQUESTED",
-        description: `Estudiante solicita aval del asesor para ${stage.stage_name}`,
+        description: `Estudiante solicita aval del director para ${stage.stage_name}`,
         metadata: { stage_id: stage.id, stage_name: stage.stage_name },
       });
-      toast({ title: "Solicitud de aval enviada", description: "Tu asesor será notificado." });
+      toast({ title: "Solicitud de aval enviada", description: "Tu director será notificado." });
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
@@ -326,7 +326,7 @@ export default function StudentDashboard() {
       if (!hasEndorsement) {
         actions.push(
           <Button key="endorse" size="sm" variant="secondary" className="text-xs gap-1" onClick={() => handleRequestEndorsement(stage)}>
-            <Send className="h-3 w-3" />Solicitar Aval al Asesor
+            <Send className="h-3 w-3" />Solicitar Aval al Director
           </Button>
         );
       }
@@ -361,7 +361,7 @@ export default function StudentDashboard() {
         <CardContent className="space-y-2 text-sm">
           <p><span className="text-muted-foreground">Programa:</span> {project.programs?.name}</p>
           <p><span className="text-muted-foreground">Modalidad:</span> {project.modalities?.name}</p>
-          <p><span className="text-muted-foreground">Asesor:</span> {project.user_profiles?.full_name || <span className="text-muted-foreground italic">Sin asignar</span>}</p>
+          <p><span className="text-muted-foreground">Director:</span> {project.user_profiles?.full_name || <span className="text-muted-foreground italic">Sin asignar</span>}</p>
         </CardContent>
       </Card>
 
@@ -489,7 +489,7 @@ export default function StudentDashboard() {
 
                   {endorsements.length > 0 && (
                     <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground">Aval del Asesor:</p>
+                      <p className="text-xs font-medium text-muted-foreground">Aval del Director:</p>
                       {endorsements.map((end: any) => (
                         <div key={end.id} className="rounded-lg border p-2 text-sm flex items-start gap-2">
                           {end.approved ? <CheckCircle className="h-4 w-4 text-success mt-0.5 shrink-0" /> : <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />}

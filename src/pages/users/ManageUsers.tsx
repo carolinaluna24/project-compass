@@ -15,7 +15,7 @@ import { Users, Pencil, Search } from "lucide-react";
 const ROLES = [
   { value: "STUDENT", label: "Estudiante" },
   { value: "COORDINATOR", label: "Coordinador" },
-  { value: "ASESOR", label: "Asesor" },
+  { value: "DIRECTOR", label: "Director" },
   { value: "JUROR", label: "Jurado" },
   { value: "DECANO", label: "Directivo" },
 ];

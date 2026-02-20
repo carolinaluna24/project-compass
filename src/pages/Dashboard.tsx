@@ -13,7 +13,7 @@ export default function Dashboard() {
       return <StudentDashboard />;
     case "COORDINATOR":
       return <CoordinatorDashboard />;
-    case "ASESOR":
+    case "DIRECTOR":
       return <DirectorDashboard />;
     case "JUROR":
       return <JurorDashboard />;

@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle } from "lucide-react";
 
-/** Página para que el asesor dé aval al informe final */
+/** Página para que el director dé aval al informe final */
 export default function EndorseInformeFinal() {
   const { stageId } = useParams<{ stageId: string }>();
   const { user } = useAuth();
@@ -62,7 +62,7 @@ export default function EndorseInformeFinal() {
         project_id: stage.project_id,
         user_id: user.id,
         event_type: "INFORME_FINAL_ENDORSED",
-        description: `Asesor ${approved ? "aprobó" : "rechazó"} el aval del informe final`,
+        description: `Director ${approved ? "aprobó" : "rechazó"} el aval del informe final`,
         metadata: { approved, comments },
       });
 
@@ -104,7 +104,7 @@ export default function EndorseInformeFinal() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Aval del Asesor — Informe Final</CardTitle>
+          <CardTitle>Aval del Director — Informe Final</CardTitle>
           <CardDescription>Revisa el informe final y decide si otorgas tu aval.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
