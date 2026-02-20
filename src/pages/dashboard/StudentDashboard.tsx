@@ -106,14 +106,30 @@ export default function StudentDashboard() {
           if (subs && subs.length > 0) {
             const subIds = subs.map(s => s.id);
             const { data: evals } = await supabase
-              .from("evaluations").select("*, user_profiles:evaluator_id(full_name)")
+              .from("evaluations").select("*")
               .in("submission_id", subIds);
-            evalMap[stage.id] = evals || [];
+            const evalsList = evals || [];
+            // Fetch evaluator profiles separately
+            const evalUserIds = [...new Set(evalsList.map(e => e.evaluator_id))];
+            let evalProfilesMap: Record<string, any> = {};
+            if (evalUserIds.length > 0) {
+              const { data: profiles } = await supabase.from("user_profiles").select("id, full_name, email").in("id", evalUserIds);
+              (profiles || []).forEach(p => { evalProfilesMap[p.id] = p; });
+            }
+            evalMap[stage.id] = evalsList.map(e => ({ ...e, user_profiles: evalProfilesMap[e.evaluator_id] || null }));
 
             const { data: endorsements } = await supabase
-              .from("endorsements").select("*, user_profiles:endorsed_by(full_name)")
+              .from("endorsements").select("*")
               .in("submission_id", subIds);
-            endorseMap[stage.id] = endorsements || [];
+            const endorseList = endorsements || [];
+            // Fetch endorser profiles separately
+            const endorseUserIds = [...new Set(endorseList.map(e => e.endorsed_by))];
+            let endorseProfilesMap: Record<string, any> = {};
+            if (endorseUserIds.length > 0) {
+              const { data: profiles } = await supabase.from("user_profiles").select("id, full_name, email").in("id", endorseUserIds);
+              (profiles || []).forEach(p => { endorseProfilesMap[p.id] = p; });
+            }
+            endorseMap[stage.id] = endorseList.map(e => ({ ...e, user_profiles: endorseProfilesMap[e.endorsed_by] || null }));
           }
 
           // Cargar deadline para etapas CON_OBSERVACIONES
