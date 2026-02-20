@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Clock, User, FileText, CheckCircle, AlertCircle, Users, CalendarClock, ExternalLink, ClipboardCheck } from "lucide-react";
+import { Clock, User, FileText, CheckCircle, AlertCircle, Users, CalendarClock, ExternalLink, ClipboardCheck, ShieldCheck } from "lucide-react";
 
 const eventIcons: Record<string, React.ElementType> = {
   PROJECT_CREATED: FileText,
@@ -190,6 +190,19 @@ export default function ProjectDetail() {
   }
   const evalLink = getEvalLink();
 
+  // Determinar enlace de aval para asesores
+  function getEndorseLink() {
+    if (!currentStage || primaryRole !== "ASESOR") return null;
+    if (project.asesor_id !== user?.id) return null;
+    const { stage_name, system_state, id } = currentStage;
+    if ((stage_name === "ANTEPROYECTO" || stage_name === "INFORME_FINAL") && system_state === "RADICADA") {
+      const prefix = stage_name === "INFORME_FINAL" ? "informe-final" : "anteproyecto";
+      return { url: `/${prefix}/${id}/endorse`, label: `Avalar ${stage_name === "INFORME_FINAL" ? "Informe Final" : "Anteproyecto"}` };
+    }
+    return null;
+  }
+  const endorseInfo = getEndorseLink();
+
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       <div className="flex items-start justify-between">
@@ -198,6 +211,14 @@ export default function ProjectDetail() {
           <p className="text-muted-foreground text-sm">{project.description}</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          {endorseInfo && (
+            <Link to={endorseInfo.url}>
+              <Button size="sm" variant="default" className="gap-1.5 shadow-sm">
+                <ShieldCheck className="h-4 w-4" />
+                {endorseInfo.label}
+              </Button>
+            </Link>
+          )}
           {evalLink && (
             <Link to={evalLink}>
               <Button size="sm" className="gap-1.5 shadow-sm">
