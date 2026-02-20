@@ -36,15 +36,26 @@ export default function JurorDashboard() {
           .eq("stage_name", a.stage_name)
           .maybeSingle();
 
-        // Verificar si ya existe evaluación del jurado para esta etapa
+        // Verificar si ya existe evaluación del jurado para la ÚLTIMA submission de esta etapa
         let alreadyEvaluated = false;
         if (stage) {
-          const { count } = await supabase
-            .from("evaluations")
-            .select("*", { count: "exact", head: true })
-            .eq("evaluator_id", user!.id)
-            .eq("project_stage_id", stage.id);
-          alreadyEvaluated = (count || 0) > 0;
+          // Obtener la última submission de la etapa
+          const { data: latestSub } = await supabase
+            .from("submissions")
+            .select("id")
+            .eq("project_stage_id", stage.id)
+            .order("version", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (latestSub) {
+            const { count } = await supabase
+              .from("evaluations")
+              .select("*", { count: "exact", head: true })
+              .eq("evaluator_id", user!.id)
+              .eq("submission_id", latestSub.id);
+            alreadyEvaluated = (count || 0) > 0;
+          }
         }
 
         return { ...a, stage, alreadyEvaluated };
@@ -84,6 +95,7 @@ export default function JurorDashboard() {
                 <p className="font-medium text-sm">{a.projects?.title}</p>
                 <p className="text-xs text-muted-foreground">
                   {a.projects?.programs?.name} — Etapa: {a.stage_name}
+                  {a.stage && <span className="ml-1">({a.stage.system_state === "CON_OBSERVACIONES" ? "Esperando nueva versión" : a.stage.system_state})</span>}
                 </p>
                 {a.due_date && (
                   <p className="text-xs text-muted-foreground">
@@ -91,11 +103,13 @@ export default function JurorDashboard() {
                   </p>
                 )}
               </div>
-              {a.stage && (
+              {a.stage && ["RADICADA", "AVALADO", "EN_REVISION"].includes(a.stage.system_state) ? (
                 <Link to={`/${a.stage_name === "INFORME_FINAL" ? "informe-final" : "anteproyecto"}/${a.stage.id}/evaluate`}>
                   <Button size="sm">Evaluar</Button>
                 </Link>
-              )}
+              ) : a.stage && a.stage.system_state === "CON_OBSERVACIONES" ? (
+                <Badge variant="outline" className="text-xs">Esperando correcciones</Badge>
+              ) : null}
             </div>
           ))}
           {pending.length === 0 && (
