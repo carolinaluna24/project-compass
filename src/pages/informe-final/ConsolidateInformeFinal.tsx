@@ -60,7 +60,7 @@ export default function ConsolidateInformeFinal() {
         (profiles || []).forEach(p => { profilesMap[p.id] = p; });
       }
       const evalsWithProfiles = evalsList.map(e => ({ ...e, user_profiles: profilesMap[e.evaluator_id] || null }));
-      setEvaluations(evalsList);
+      setEvaluations(evalsWithProfiles);
       if (evalsList.length >= 2) {
         const results = evalsList.map((e) => e.official_result);
         const allApproved = results.every((r) => r === "APROBADO");
