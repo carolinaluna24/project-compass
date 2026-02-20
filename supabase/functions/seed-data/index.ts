@@ -66,8 +66,8 @@ serve(async (req) => {
       { email: "student4@test.com", name: "Luis Ramírez", role: "STUDENT", programId: progMec.id },
       { email: "student5@test.com", name: "Sofía Torres", role: "STUDENT", programId: progCiv.id },
       { email: "student6@test.com", name: "Diego Morales", role: "STUDENT", programId: progCiv.id },
-      { email: "director@test.com", name: "Pedro Martínez", role: "DIRECTOR", programId: null },
-      { email: "director2@test.com", name: "Carmen Ruiz", role: "DIRECTOR", programId: null },
+      { email: "director@test.com", name: "Pedro Martínez", role: "ASESOR", programId: null },
+      { email: "director2@test.com", name: "Carmen Ruiz", role: "ASESOR", programId: null },
       { email: "juror1@test.com", name: "Laura Sánchez", role: "JUROR", programId: null },
       { email: "juror2@test.com", name: "José Hernández", role: "JUROR", programId: null },
       { email: "juror3@test.com", name: "Elena Castro", role: "JUROR", programId: null },
@@ -132,7 +132,7 @@ serve(async (req) => {
       const { data: proj, error: projErr } = await supabase.from("projects").insert({
         title: opts.title, description: opts.description,
         program_id: opts.programId, modality_id: opts.modalityId,
-        created_by: opts.createdBy, director_id: opts.directorId,
+        created_by: opts.createdBy, asesor_id: opts.directorId,
         global_status: opts.globalStatus as any,
       }).select().single();
       if (projErr) throw new Error(`Error proyecto "${opts.title}": ${projErr.message}`);

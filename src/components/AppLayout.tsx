@@ -24,7 +24,7 @@ const navItems: Record<string, { label: string; path: string; icon: React.Elemen
     { label: "Exportar BD", path: "/admin/export", icon: DatabaseZap },
     { label: "Escalabilidad", path: "/about/scalability", icon: Info },
   ],
-  DIRECTOR: [
+  ASESOR: [
     { label: "Mis Proyectos", path: "/dashboard", icon: LayoutDashboard },
     { label: "Catálogo", path: "/catalog", icon: BookOpen },
   ],
@@ -61,7 +61,7 @@ export default function AppLayout() {
   const roleLabel: Record<string, string> = {
     STUDENT: "Estudiante",
     COORDINATOR: "Coordinador",
-    DIRECTOR: "Director",
+    ASESOR: "Asesor",
     JUROR: "Jurado",
     DECANO: "Directivo",
   };
