@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/useAuth";
+import { useActiveRole } from "@/contexts/RoleContext";
 import StudentDashboard from "./dashboard/StudentDashboard";
 import CoordinatorDashboard from "./dashboard/CoordinatorDashboard";
 import DirectorDashboard from "./dashboard/DirectorDashboard";
@@ -6,9 +6,9 @@ import JurorDashboard from "./dashboard/JurorDashboard";
 import DecanoDashboard from "./dashboard/DecanoDashboard";
 
 export default function Dashboard() {
-  const { primaryRole } = useAuth();
+  const { activeRole } = useActiveRole();
 
-  switch (primaryRole) {
+  switch (activeRole) {
     case "STUDENT":
       return <StudentDashboard />;
     case "COORDINATOR":
@@ -20,6 +20,6 @@ export default function Dashboard() {
     case "DECANO":
       return <DecanoDashboard />;
     default:
-      return <div className="py-8 text-center text-muted-foreground">Sin rol asignado</div>;
+      return <div className="py-8 text-center text-muted-foreground">Selecciona un rol en el menú lateral</div>;
   }
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useActiveRole } from "@/contexts/RoleContext";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +19,8 @@ const eventIcons: Record<string, React.ElementType> = {
 
 export default function ProjectDetail() {
   const { projectId } = useParams<{ projectId: string }>();
-  const { user, roles, primaryRole } = useAuth();
+  const { user, roles } = useAuth();
+  const { activeRole } = useActiveRole();
   const { toast } = useToast();
   const [project, setProject] = useState<any>(null);
   const [stages, setStages] = useState<any[]>([]);
@@ -34,14 +36,14 @@ export default function ProjectDetail() {
 
   useEffect(() => {
     if (projectId) loadData();
-  }, [projectId, primaryRole]);
+  }, [projectId, activeRole]);
 
   async function loadData() {
     const [projRes, stagesRes, membersRes, auditRes] = await Promise.all([
       supabase.from("projects").select("*, programs(name), modalities(name), user_profiles!projects_director_id_fkey(full_name)").eq("id", projectId!).maybeSingle(),
       supabase.from("project_stages").select("*").eq("project_id", projectId!).order("created_at"),
       supabase.from("project_members").select("*").eq("project_id", projectId!),
-      (primaryRole === "COORDINATOR" || primaryRole === "DECANO")
+      (activeRole === "COORDINATOR" || activeRole === "DECANO")
         ? supabase.from("audit_events").select("*").eq("project_id", projectId!).order("created_at", { ascending: false })
         : Promise.resolve({ data: [] }),
     ]);
@@ -116,7 +118,7 @@ export default function ProjectDetail() {
     }
 
     // Cargar asesores disponibles si es coordinador
-    if (primaryRole === "COORDINATOR") {
+    if (activeRole === "COORDINATOR") {
       const { data: asesorRoles } = await supabase.from("user_roles").select("user_id").eq("role", "ASESOR");
       if (asesorRoles && asesorRoles.length > 0) {
         const { data: asesorProfiles } = await supabase.from("user_profiles").select("id, full_name, email").in("id", asesorRoles.map(r => r.user_id));
@@ -171,7 +173,7 @@ export default function ProjectDetail() {
   // Determinar enlace de evaluación según etapa actual
   const currentStage = stages.length > 0 ? stages[stages.length - 1] : null;
   function getEvalLink() {
-    if (!currentStage || primaryRole !== "COORDINATOR") return null;
+    if (!currentStage || activeRole !== "COORDINATOR") return null;
     const { stage_name, system_state, id } = currentStage;
     if (stage_name === "PROPUESTA" && system_state === "RADICADA") return `/proposals/${id}/evaluate`;
     if (stage_name === "ANTEPROYECTO") {
@@ -192,7 +194,7 @@ export default function ProjectDetail() {
 
   // Determinar enlace de aval para asesores
   function getEndorseLink() {
-    if (!currentStage || primaryRole !== "ASESOR") return null;
+    if (!currentStage || activeRole !== "ASESOR") return null;
     if (project.asesor_id !== user?.id) return null;
     const { stage_name, system_state, id } = currentStage;
     if ((stage_name === "ANTEPROYECTO" || stage_name === "INFORME_FINAL") && system_state === "RADICADA") {
@@ -261,7 +263,7 @@ export default function ProjectDetail() {
               <Badge variant="outline" className="text-xs">Asesor</Badge>
             </div>
           )}
-          {primaryRole === "COORDINATOR" && directors.length > 0 && (
+          {activeRole === "COORDINATOR" && directors.length > 0 && (
             <div className="space-y-2">
               {!project.asesor_id && (
                 <p className="text-sm text-muted-foreground">Este proyecto no tiene asesor asignado.</p>
@@ -285,7 +287,7 @@ export default function ProjectDetail() {
               </div>
             </div>
           )}
-          {!project.asesor_id && primaryRole !== "COORDINATOR" && (
+          {!project.asesor_id && activeRole !== "COORDINATOR" && (
             <p className="text-sm text-muted-foreground italic">Sin asesor asignado</p>
           )}
         </CardContent>
