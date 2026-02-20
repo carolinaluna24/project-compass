@@ -75,14 +75,31 @@ export default function ConsolidateAnteproject() {
         .maybeSingle();
       setProject(proj);
 
-      // Cargar evaluaciones con nombre del jurado
+      // Cargar evaluaciones
       const { data: evals } = await supabase
         .from("evaluations")
-        .select("*, user_profiles:evaluator_id(full_name, email)")
+        .select("*")
         .eq("project_stage_id", stageId);
 
       const evalsList = evals || [];
-      setEvaluations(evalsList);
+
+      // Cargar perfiles de evaluadores por separado (no hay FK directa)
+      const evaluatorIds = [...new Set(evalsList.map(e => e.evaluator_id))];
+      let evaluatorMap: Record<string, any> = {};
+      if (evaluatorIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("user_profiles")
+          .select("id, full_name, email")
+          .in("id", evaluatorIds);
+        (profiles || []).forEach(p => { evaluatorMap[p.id] = p; });
+      }
+
+      // Adjuntar perfil a cada evaluación
+      const evalsWithProfiles = evalsList.map(e => ({
+        ...e,
+        user_profiles: evaluatorMap[e.evaluator_id] || null,
+      }));
+      setEvaluations(evalsWithProfiles);
 
       // Calcular resultado consolidado
       if (evalsList.length >= 2) {
