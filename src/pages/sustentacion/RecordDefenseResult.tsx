@@ -127,6 +127,31 @@ export default function RecordDefenseResult() {
     );
   }
 
+  // Validar que la sustentación ya haya ocurrido
+  const defensePending = !defenseSession || new Date(defenseSession.scheduled_at) > new Date();
+  if (defensePending) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-4">
+        <Card>
+          <CardHeader><CardTitle className="text-base">{project.title}</CardTitle><CardDescription>{project.programs?.name}</CardDescription></CardHeader>
+          <CardContent className="text-center space-y-3">
+            {!defenseSession ? (
+              <p className="text-muted-foreground">No se ha programado una sustentación para este proyecto.</p>
+            ) : (
+              <>
+                <p className="text-muted-foreground">
+                  La sustentación está programada para el <span className="font-semibold text-foreground">{new Date(defenseSession.scheduled_at).toLocaleString("es-CO")}</span>.
+                </p>
+                <p className="text-sm text-muted-foreground">Solo se puede registrar el resultado después de la fecha de sustentación.</p>
+              </>
+            )}
+            <Button variant="outline" onClick={() => navigate("/dashboard")}>Volver</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const gradeNum = parseInt(grade, 10);
   const gradePreview = !isNaN(gradeNum) && gradeNum >= 0 && gradeNum <= 100 ? getGradeLabel(gradeNum) : null;
 
