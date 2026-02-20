@@ -52,9 +52,22 @@ export default function AssignJurorsInformeFinal() {
       setJurors(profiles || []);
     }
 
-    // Asignaciones existentes
-    const { data: existing } = await supabase.from("assignments").select("*, user_profiles:user_id(full_name, email)").eq("project_id", stageData.project_id).eq("stage_name", "INFORME_FINAL");
-    setExistingAssignments(existing || []);
+    // Asignaciones existentes (sin FK join, cargar perfiles aparte)
+    const { data: existing } = await supabase.from("assignments").select("*").eq("project_id", stageData.project_id).eq("stage_name", "INFORME_FINAL");
+    if (existing && existing.length > 0) {
+      const assignedUserIds = existing.map((a) => a.user_id);
+      const { data: assignedProfiles } = await supabase.from("user_profiles").select("id, full_name, email").in("id", assignedUserIds);
+      const profileMap: Record<string, any> = {};
+      (assignedProfiles || []).forEach((p) => { profileMap[p.id] = p; });
+      setExistingAssignments(existing.map((a) => ({ ...a, user_profiles: profileMap[a.user_id] || null })));
+
+      // Si ya hay jurados asignados y el estado es AVALADO/RADICADA (re-radicación), transicionar a EN_REVISION
+      if (stageData.system_state === "AVALADO" || stageData.system_state === "RADICADA") {
+        await supabase.from("project_stages").update({ system_state: "EN_REVISION" as any }).eq("id", stageData.id);
+      }
+    } else {
+      setExistingAssignments([]);
+    }
     setLoading(false);
   }
 
