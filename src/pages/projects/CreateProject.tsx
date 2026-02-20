@@ -164,6 +164,24 @@ export default function CreateProject() {
     setSubmitting(true);
 
     try {
+      // 0. Verificar que el estudiante no tenga ya un proyecto activo
+      const { data: activeProjects } = await supabase
+        .from("project_members")
+        .select("project_id, projects!inner(global_status)")
+        .eq("user_id", user.id)
+        .eq("role", "AUTHOR")
+        .eq("projects.global_status", "VIGENTE");
+
+      if (activeProjects && activeProjects.length > 0) {
+        toast({
+          title: "No puedes crear otro proyecto",
+          description: "Ya tienes un proyecto activo (VIGENTE). Un estudiante no puede participar en más de un proyecto activo.",
+          variant: "destructive",
+        });
+        setSubmitting(false);
+        return;
+      }
+
       // 1. Crear el proyecto en la tabla projects
       console.log("Creating project with:", { title, description, programId, modalityId, userId: user.id });
       const { data: project, error: projErr } = await supabase
