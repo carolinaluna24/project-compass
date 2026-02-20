@@ -27,13 +27,14 @@ export default function CoordinatorDashboard() {
   const [sustentacionStages, setSustentacionStages] = useState<any[]>([]);
   const [directors, setDirectors] = useState<any[]>([]);
   const [jurors, setJurors] = useState<any[]>([]);
+  const [projectAuthors, setProjectAuthors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { loadData(); }, []);
 
   async function loadData() {
     setLoading(true);
-    const [projectsRes, proposalsRes, anteRes, informeRes, sustRes, dirRolesRes, jurorRolesRes] = await Promise.all([
+    const [projectsRes, proposalsRes, anteRes, informeRes, sustRes, dirRolesRes, jurorRolesRes, membersRes] = await Promise.all([
       supabase.from("projects").select("*, programs(name), modalities(name), user_profiles!projects_director_id_fkey(full_name)").order("created_at", { ascending: false }),
       supabase.from("project_stages").select("*, projects(id, title, programs(name))").eq("stage_name", "PROPUESTA").eq("system_state", "RADICADA"),
       supabase.from("project_stages").select("*, projects(id, title, programs(name))").eq("stage_name", "ANTEPROYECTO").neq("system_state", "CERRADA"),
@@ -41,12 +42,30 @@ export default function CoordinatorDashboard() {
       supabase.from("project_stages").select("*, projects(id, title, programs(name))").eq("stage_name", "SUSTENTACION").neq("system_state", "CERRADA"),
       supabase.from("user_roles").select("user_id").eq("role", "DIRECTOR"),
       supabase.from("user_roles").select("user_id").eq("role", "JUROR"),
+      supabase.from("project_members").select("project_id, user_id, role").eq("role", "AUTHOR"),
     ]);
     setProjects(projectsRes.data || []);
     setPendingProposals(proposalsRes.data || []);
     setAnteproyectoStages(anteRes.data || []);
     setInformeFinalStages(informeRes.data || []);
     setSustentacionStages(sustRes.data || []);
+
+    // Cargar nombres de autores
+    const authorMembers = membersRes.data || [];
+    const authorUserIds = [...new Set(authorMembers.map(m => m.user_id))];
+    let authorProfilesMap: Record<string, string> = {};
+    if (authorUserIds.length > 0) {
+      const { data: authorProfiles } = await supabase.from("user_profiles").select("id, full_name").in("id", authorUserIds);
+      (authorProfiles || []).forEach(p => { authorProfilesMap[p.id] = p.full_name; });
+    }
+    // Build project -> author names map
+    const projectAuthorsMap: Record<string, string[]> = {};
+    authorMembers.forEach(m => {
+      if (!projectAuthorsMap[m.project_id]) projectAuthorsMap[m.project_id] = [];
+      const name = authorProfilesMap[m.user_id];
+      if (name) projectAuthorsMap[m.project_id].push(name);
+    });
+    setProjectAuthors(projectAuthorsMap);
 
     // Cargar perfiles de directores y jurados
     const dirIds = (dirRolesRes.data || []).map(r => r.user_id);
@@ -172,11 +191,12 @@ export default function CoordinatorDashboard() {
         <CardHeader><CardTitle className="text-base">Todos los Proyectos</CardTitle></CardHeader>
         <CardContent>
           <Table>
-            <TableHeader><TableRow><TableHead>Título</TableHead><TableHead>Programa</TableHead><TableHead>Director</TableHead><TableHead>Estado</TableHead><TableHead>Fecha</TableHead><TableHead></TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Título</TableHead><TableHead>Autor(es)</TableHead><TableHead>Programa</TableHead><TableHead>Director</TableHead><TableHead>Estado</TableHead><TableHead>Fecha</TableHead><TableHead></TableHead></TableRow></TableHeader>
             <TableBody>
               {projects.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell className="font-medium text-sm">{p.title}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{(projectAuthors[p.id] || []).join(", ") || "—"}</TableCell>
                   <TableCell className="text-sm">{p.programs?.name}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{p.user_profiles?.full_name || "—"}</TableCell>
                   <TableCell><Badge className={`text-xs ${statusColor[p.global_status] || "bg-muted"}`}>{p.global_status}</Badge></TableCell>
@@ -184,7 +204,7 @@ export default function CoordinatorDashboard() {
                   <TableCell><Link to={`/projects/${p.id}`}><Button variant="ghost" size="sm" className="text-xs">Ver</Button></Link></TableCell>
                 </TableRow>
               ))}
-              {projects.length === 0 && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No hay proyectos</TableCell></TableRow>}
+              {projects.length === 0 && <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No hay proyectos</TableCell></TableRow>}
             </TableBody>
           </Table>
         </CardContent>

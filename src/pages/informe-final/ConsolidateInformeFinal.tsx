@@ -55,9 +55,11 @@ export default function ConsolidateInformeFinal() {
       setEvaluations(evalsList);
       if (evalsList.length >= 2) {
         const results = evalsList.map((e) => e.official_result);
-        if (results.includes("NO_APROBADO")) setConsolidatedResult("NO_APROBADA");
-        else if (results.includes("APLAZADO_POR_MODIFICACIONES")) setConsolidatedResult("APROBADA_CON_MODIFICACIONES");
-        else setConsolidatedResult("APROBADA");
+        const allApproved = results.every((r) => r === "APROBADO");
+        const allRejected = results.every((r) => r === "NO_APROBADO");
+        if (allApproved) setConsolidatedResult("APROBADA");
+        else if (allRejected) setConsolidatedResult("NO_APROBADA");
+        else setConsolidatedResult("APROBADA_CON_MODIFICACIONES");
       }
     }
     setLoading(false);
