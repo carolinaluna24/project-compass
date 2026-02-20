@@ -33,6 +33,7 @@ import {
   Scale,
   ShieldCheck,
   Building2,
+  List,
 } from "lucide-react";
 import { signOut } from "@/lib/auth";
 import { useNavigate } from "react-router-dom";
@@ -75,6 +76,8 @@ const navItems: Record<AppRole, { label: string; path: string; icon: React.Eleme
   DECANO: [
     { label: "Indicadores", path: "/dashboard", icon: LayoutDashboard },
     { label: "Reportes", path: "/reports", icon: BarChart3 },
+    { label: "Proyectos", path: "/reports/projects", icon: List },
+    { label: "Plazos", path: "/reports/deadlines", icon: Clock },
     { label: "Catálogo", path: "/catalog", icon: BookOpen },
     { label: "Exportar BD", path: "/admin/export", icon: DatabaseZap },
   ],
