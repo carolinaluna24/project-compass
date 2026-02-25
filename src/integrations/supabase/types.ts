@@ -403,6 +403,13 @@ export type Database = {
             referencedRelation: "modalities"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "modality_configs_modality_id_fkey"
+            columns: ["modality_id"]
+            isOneToOne: true
+            referencedRelation: "v_project_current_stage"
+            referencedColumns: ["modality_id"]
+          },
         ]
       }
       programs: {
@@ -580,11 +587,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "projects_modality_id_fkey"
+            columns: ["modality_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_current_stage"
+            referencedColumns: ["modality_id"]
+          },
+          {
             foreignKeyName: "projects_program_id_fkey"
             columns: ["program_id"]
             isOneToOne: false
             referencedRelation: "programs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_current_stage"
+            referencedColumns: ["program_id"]
           },
         ]
       }
@@ -741,6 +762,13 @@ export type Database = {
             referencedRelation: "programs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_profiles_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "v_project_current_stage"
+            referencedColumns: ["program_id"]
+          },
         ]
       }
       user_roles: {
@@ -767,10 +795,8 @@ export type Database = {
         Row: {
           author_count: number | null
           created_at: string | null
-          current_official_state:
-            | Database["public"]["Enums"]["official_state"]
-            | null
-          current_stage: Database["public"]["Enums"]["stage_name"] | null
+          current_official_state: string | null
+          current_stage: string | null
           global_status: Database["public"]["Enums"]["global_status"] | null
           modality_name: string | null
           program_name: string | null
@@ -846,20 +872,6 @@ export type Database = {
             columns: ["asesor_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "projects_modality_id_fkey"
-            columns: ["modality_id"]
-            isOneToOne: false
-            referencedRelation: "modalities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "projects_program_id_fkey"
-            columns: ["program_id"]
-            isOneToOne: false
-            referencedRelation: "programs"
             referencedColumns: ["id"]
           },
         ]
