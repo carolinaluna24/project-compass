@@ -30,6 +30,7 @@ const stageLabels: Record<string, string> = {
   ANTEPROYECTO: "Anteproyecto",
   INFORME_FINAL: "Informe Final",
   SUSTENTACION: "Sustentación",
+  SIN_ASIGNAR: "Sin Asignar",
 };
 
 const statusColors: Record<string, string> = {
@@ -127,6 +128,7 @@ export default function Catalog() {
                   <SelectItem value="ANTEPROYECTO">Anteproyecto</SelectItem>
                   <SelectItem value="INFORME_FINAL">Informe Final</SelectItem>
                   <SelectItem value="SUSTENTACION">Sustentación</SelectItem>
+                  <SelectItem value="SIN_ASIGNAR">Sin Asignar</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -140,6 +142,7 @@ export default function Catalog() {
                   <SelectItem value="APROBADA">Aprobada</SelectItem>
                   <SelectItem value="APROBADA_CON_MODIFICACIONES">Con Modificaciones</SelectItem>
                   <SelectItem value="NO_APROBADA">No Aprobada</SelectItem>
+                  <SelectItem value="SIN_ASIGNAR">Sin Asignar</SelectItem>
                 </SelectContent>
               </Select>
             </div>
