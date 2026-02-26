@@ -522,11 +522,11 @@ export default function StudentDashboard() {
                   {evals.length > 0 && (
                     <div className="space-y-1">
                       <p className="text-xs font-medium text-muted-foreground">Evaluaciones de jurados:</p>
-                      {evals.map((ev: any) => (
+                      {evals.map((ev: any, idx: number) => (
                         <div key={ev.id} className="rounded-lg border p-2 text-sm">
                           <div className="flex items-center gap-2">
                             <Eye className="h-3 w-3 text-muted-foreground" />
-                            <span className="font-medium text-xs">{ev.user_profiles?.full_name || "Jurado"}</span>
+                            <span className="font-medium text-xs">Evaluador {idx + 1}</span>
                             {ev.official_result && (
                               <Badge variant="outline" className="text-xs">
                                 {ev.official_result === "APROBADO" ? "Aprobado" : ev.official_result === "APLAZADO_POR_MODIFICACIONES" ? "Con modificaciones" : "No aprobado"}
