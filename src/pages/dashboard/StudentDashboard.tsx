@@ -169,6 +169,17 @@ export default function StudentDashboard() {
         setEndorsementsByStage(endorseMap);
         setDeadlinesByStage(deadlineMap);
 
+        // Cargar sesión de sustentación si existe etapa SUSTENTACION
+        const sustStage = stagesList.find((s: any) => s.stage_name === "SUSTENTACION");
+        if (sustStage) {
+          const { data: session } = await supabase
+            .from("defense_sessions")
+            .select("*")
+            .eq("stage_id", sustStage.id)
+            .maybeSingle();
+          setDefenseSession(session);
+        }
+
         // Pre-cargar signed URLs para todos los archivos
         const allPaths = Object.values(subsMap)
           .flat()
