@@ -161,11 +161,11 @@ export default function Catalog() {
               <TableRow>
                 <TableHead>Título</TableHead>
                 <TableHead>Programa</TableHead>
-                {!isStudent && <TableHead>Autores</TableHead>}
+                <TableHead>Autores</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Etapa</TableHead>
-                {!isStudent && <TableHead>Estado Oficial</TableHead>}
-                {!isStudent && <TableHead>Fecha</TableHead>}
+                <TableHead>Estado Oficial</TableHead>
+                <TableHead>Fecha</TableHead>
                 {!isStudent && <TableHead></TableHead>}
               </TableRow>
             </TableHeader>
