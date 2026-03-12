@@ -188,16 +188,12 @@ export default function Catalog() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm">{stageLabels[r.current_stage] || r.current_stage}</TableCell>
-                  {!isStudent && (
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs">{r.current_official_state}</Badge>
-                    </TableCell>
-                  )}
-                  {!isStudent && (
-                    <TableCell className="text-xs text-muted-foreground">
-                      {new Date(r.created_at).toLocaleDateString("es-CO")}
-                    </TableCell>
-                  )}
+                  <TableCell>
+                    <Badge variant="outline" className="text-xs">{r.current_official_state}</Badge>
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {new Date(r.created_at).toLocaleDateString("es-CO")}
+                  </TableCell>
                   {!isStudent && (
                     <TableCell>
                       <Link to={`/catalog/${r.project_id}`}>
