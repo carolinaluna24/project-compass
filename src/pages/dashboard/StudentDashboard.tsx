@@ -459,6 +459,19 @@ export default function StudentDashboard() {
                     </div>
                   )}
 
+                  {/* Fecha de sustentación programada */}
+                  {stageName === "SUSTENTACION" && defenseSession && (
+                    <Alert className="border-primary/30 bg-primary/5">
+                      <Clock className="h-4 w-4 text-primary" />
+                      <AlertTitle className="text-sm font-semibold">Sustentación Programada</AlertTitle>
+                      <AlertDescription className="text-xs mt-1 space-y-0.5">
+                        <p><strong>Fecha:</strong> {new Date(defenseSession.scheduled_at).toLocaleString("es-CO", { dateStyle: "long", timeStyle: "short" })}</p>
+                        <p><strong>Lugar:</strong> {defenseSession.location}</p>
+                        {defenseSession.notes && <p><strong>Notas:</strong> {defenseSession.notes}</p>}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
                   {/* Alerta de fecha límite para correcciones */}
                   {stage.system_state === "CON_OBSERVACIONES" && deadline && (() => {
                     const due = new Date(deadline.due_date);
