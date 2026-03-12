@@ -50,6 +50,7 @@ export default function StudentDashboard() {
   const [evaluationsByStage, setEvaluationsByStage] = useState<Record<string, any[]>>({});
   const [endorsementsByStage, setEndorsementsByStage] = useState<Record<string, any[]>>({});
   const [deadlinesByStage, setDeadlinesByStage] = useState<Record<string, any>>({});
+  const [defenseSession, setDefenseSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   // Upload dialog state
