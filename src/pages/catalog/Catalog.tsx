@@ -176,14 +176,12 @@ export default function Catalog() {
                     {r.title}
                   </TableCell>
                   <TableCell className="text-sm">{r.program_name || "—"}</TableCell>
-                  {!isStudent && (
-                    <TableCell className="text-sm">
-                      <span className="flex items-center gap-1">
-                        <Users className="h-3 w-3 text-muted-foreground" />
-                        {r.author_count}
-                      </span>
-                    </TableCell>
-                  )}
+                  <TableCell className="text-sm">
+                    <span className="flex items-center gap-1">
+                      <Users className="h-3 w-3 text-muted-foreground" />
+                      {r.author_count}
+                    </span>
+                  </TableCell>
                   <TableCell>
                     <Badge className={`text-xs ${statusColors[r.global_status] || "bg-muted"}`}>
                       {r.global_status}
