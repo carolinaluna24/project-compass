@@ -205,7 +205,7 @@ export default function Catalog() {
               ))}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={isStudent ? 4 : 8} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={isStudent ? 7 : 8} className="text-center text-muted-foreground py-8">
                     No se encontraron proyectos
                   </TableCell>
                 </TableRow>
