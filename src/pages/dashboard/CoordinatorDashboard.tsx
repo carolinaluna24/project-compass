@@ -31,6 +31,7 @@ export default function CoordinatorDashboard() {
   const [projectAuthors, setProjectAuthors] = useState<Record<string, string[]>>({});
   const [projectCurrentStage, setProjectCurrentStage] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => { loadData(); }, []);
 
