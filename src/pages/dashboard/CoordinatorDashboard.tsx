@@ -257,7 +257,19 @@ export default function CoordinatorDashboard() {
           <Table>
             <TableHeader><TableRow><TableHead>Título</TableHead><TableHead>Autor(es)</TableHead><TableHead>Programa</TableHead><TableHead>Asesor</TableHead><TableHead>Etapa</TableHead><TableHead>Estado</TableHead><TableHead>Fecha</TableHead><TableHead className="text-right">Acciones</TableHead></TableRow></TableHeader>
             <TableBody>
-              {projects.map((p) => {
+              {projects
+                .filter((p) => {
+                  if (!searchTerm.trim()) return true;
+                  const term = searchTerm.toLowerCase();
+                  const authors = (projectAuthors[p.id] || []).join(", ").toLowerCase();
+                  return (
+                    p.title?.toLowerCase().includes(term) ||
+                    p.programs?.name?.toLowerCase().includes(term) ||
+                    p.user_profiles?.full_name?.toLowerCase().includes(term) ||
+                    authors.includes(term)
+                  );
+                })
+                .map((p) => {
                 const evalLink = getEvaluateLink(p.id);
                 const currentStage = projectCurrentStage[p.id];
                 return (
