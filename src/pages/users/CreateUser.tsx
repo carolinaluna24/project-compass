@@ -128,7 +128,7 @@ export default function CreateUser() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">Nombres *</Label>
-                <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Ej: Juan Carlos" maxLength={100} />
+                <Input id="firstName" ref={firstNameRef} value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Ej: Juan Carlos" maxLength={100} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Apellidos *</Label>
