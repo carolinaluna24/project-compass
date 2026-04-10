@@ -98,8 +98,6 @@ export default function CreateUser() {
       setPhone("");
       setEmail("");
       setPassword("");
-      setSelectedRoles([]);
-      setProgramId("");
       setTimeout(() => firstNameRef.current?.focus(), 100);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
