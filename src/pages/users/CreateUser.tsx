@@ -30,6 +30,7 @@ export default function CreateUser() {
   const [programs, setPrograms] = useState<{ id: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const firstNameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     supabase.from("programs").select("id, name").then(({ data }) => {
